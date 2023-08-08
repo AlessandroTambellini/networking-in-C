@@ -15,13 +15,13 @@ int main(int argc, char *argv[])
     struct sockaddr_in serv; // socket info about our server
     socklen_t socksize = sizeof(struct sockaddr_in);
 
-    memset(&serv, 0,
-        sizeof(serv)); // zero the struct before filling the fields
-    serv.sin_family = AF_INET; // set the type of connection to TCP/IP
-    serv.sin_addr.s_addr = htonl(INADDR_ANY); // set our address to any interface
-    serv.sin_port = htons(PORTNUM); // set the server port number
+    // address setup
+    memset(&serv, 0, sizeof(serv));
+    serv.sin_family = AF_INET;
+    serv.sin_addr.s_addr = htonl(INADDR_ANY);
+    serv.sin_port = htons(PORTNUM);
 
-    int mysocket = socket(AF_INET, SOCK_STREAM, 0); // socket(family, type, protocol)
+    int mysocket = socket(AF_INET, SOCK_STREAM, 0);
     /*
         family
             AF_INET for IPv4
@@ -48,7 +48,7 @@ int main(int argc, char *argv[])
     }
 
     // bind a socket to a port
-    if (bind(mysocket, (struct sockaddr *)&serv, sizeof(struct sockaddr)) == -1) {
+    if (bind(mysocket, (sockaddr *)&serv, sizeof(sockaddr)) == -1) {
         printf("Error: unable to bind.\n");
         exit(EXIT_FAILURE);
     }
@@ -64,7 +64,7 @@ int main(int argc, char *argv[])
         exit(EXIT_FAILURE);
     }
 
-    int connect_socket = accept(mysocket, (struct sockaddr *)&dest, &socksize);
+    int connect_socket = accept(mysocket, (sockaddr *)&dest, &socksize);
     if (connect_socket == -1) {
         printf("Error: unable to open new socket.\n");
         exit(EXIT_FAILURE);
@@ -74,7 +74,7 @@ int main(int argc, char *argv[])
         printf("Incoming connection from %s - sending msg\n", inet_ntoa(dest.sin_addr));
         send(connect_socket, msg, strlen(msg), 0);
         close(connect_socket);
-        connect_socket = accept(mysocket, (struct sockaddr *)&dest, &socksize);
+        connect_socket = accept(mysocket, (sockaddr *)&dest, &socksize);
     }
 
     close(mysocket);

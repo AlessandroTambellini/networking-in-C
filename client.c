@@ -9,13 +9,14 @@ int main(int argc, char *argv[])
 
     int mysocket = socket(AF_INET, SOCK_STREAM, 0);
 
-    memset(&addr, 0, sizeof(addr)); /* zero the struct */
+    // address setup
+    memset(&addr, 0, sizeof(addr));
     addr.sin_family = AF_INET;
-    addr.sin_addr.s_addr = htonl(INADDR_LOOPBACK); /* set IP number - localhost, 127.0.0.1 */
-    addr.sin_port = htons(PORTNUM); /* set port number */
+    addr.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
+    addr.sin_port = htons(PORTNUM);
 
     // use the mysocket to create a connection to the machine specified in addr
-    if (connect(mysocket, (struct sockaddr *)&addr, sizeof(struct sockaddr_in)) == -1) {
+    if (connect(mysocket, (sockaddr *)&addr, sizeof(struct sockaddr_in)) == -1) {
         printf("Error: unable to create a connection.\n");
         exit(EXIT_FAILURE);
     }
