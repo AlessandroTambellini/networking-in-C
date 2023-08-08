@@ -8,9 +8,9 @@
     <style>
         /* general setup START */
         :root {
-            --clr-primary: 300, 100%, 25%;
-            --clr-neutral: 60, 19%, 92%;
-            --clr-secondary: 193, 97%, 34%;
+            --clr-primary: 260, 100%, 66%;
+            --clr-secondary: 240, 4%, 23%;
+            --clr-neutral: 0, 0%, 100%;
 
             --ff-primary: -apple-system;
             --ff-fallback: BlinkMacSystemFont;
@@ -37,6 +37,10 @@
                 --fs-huge: 3.5rem;
                 --fs-medium: 1.125rem;
             }
+
+            #snowflake-container {
+                flex-direction: row;
+            }
         }
 
         @media (min-width: 45em) {
@@ -45,6 +49,10 @@
                 --fs-huge: 4.5rem;
                 --fs-medium: 1.25rem;
                 --fs-small: 1rem;
+            }
+
+            #snowflake-container {
+                flex-direction: row;
             }
         }
 
@@ -85,6 +93,10 @@
 
         /* general setup END */
 
+        html {
+            background-color: hsl(var(--clr-secondary));
+        }
+
         body {
             text-rendering: optimizeSpeed;
             line-height: 1.5;
@@ -94,32 +106,63 @@
         }
 
         h1 {
+            margin-top: calc(var(--fs-huge) / 2);
             text-align: center;
             color: hsl(var(--clr-primary));
             font-size: var(--fs-huge);
             line-height: 1.1;
+            margin-bottom: calc(var(--fs-huge) / 2);
         }
 
         #profiles {
-            margin-top: calc(var(--fs-huge) / 2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+            column-gap: var(--fs-small);
         }
 
         #profiles>li {
             font-weight: var(--fw-bold);
-            font-size: var(--fs-medium);
+            font-size: var(--fs-small);
         }
 
-        #snowflake {
-            margin-top: var(--fs-medium);
+        #snowflake-container {
+            display: flex;
+            flex-direction: column-reverse;
+            align-items: center;
+            justify-content: center;
+            column-gap: var(--fs-small);
+            margin-bottom: calc(var(--fs-huge) / 2);
+        }
+
+        #snowflake-container>p {
+            font-size: var(--fs-small);
+            color: hsl(var(--clr-neutral));
+        }
+
+        @media (min-width: 35em) {
+            #snowflake-container {
+                flex-direction: row;
+            }
         }
     </style>
 </head>
 
 <body>
     <h1>Alessandro Tambellini</h1>
+    <article id="snowflake-container">
+        <p>The Russian government is trying to block the Tor network, but users can circumvent this block by using a Tor
+            Bridge or Tor Snowflake.</p>
+        <iframe id="snowflake" src="https://snowflake.torproject.org/embed.html" width="320" height="240"
+            frameborder="0" scrolling="no"></iframe>
+    </article>
+    <!-- TODO: Draw something here with vectors -->
     <ul id="profiles">
         <li>
-            <a style="color: #333;" href="https://github.com/AlessandroTambellini?tab=repositories">My GitHub
+            <!--#333-->
+            <a style="color: hsl(0, 0%, 100%);" href="https://github.com/AlessandroTambellini?tab=repositories">My
+                GitHub
                 Profile</a>
         </li>
         <li>
@@ -130,9 +173,6 @@
             <a style="color: black;" href="https://twitter.com/Alessan78667092">My X Profile</a>
         </li>
     </ul>
-    <iframe id="snowflake" src="https://snowflake.torproject.org/embed.html" width="320" height="240" frameborder="0"
-        scrolling="no"></iframe>
-    <!-- TODO: Draw something here with vectors -->
 </body>
 
 </html>
