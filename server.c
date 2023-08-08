@@ -1,4 +1,5 @@
 #include "common.h"
+#include "html.h"
 
 #define MAX_HOSTNAME_SIZE 100
 
@@ -9,8 +10,6 @@ int mistring()
 
 int main(int argc, char *argv[])
 {
-    char *msg = "Hello World !\n";
-
     struct sockaddr_in dest; // socket info about the machine connecting to us
     struct sockaddr_in serv; // socket info about our server
     socklen_t socksize = sizeof(struct sockaddr_in);
@@ -22,16 +21,6 @@ int main(int argc, char *argv[])
     serv.sin_port = htons(PORTNUM);
 
     int mysocket = socket(AF_INET, SOCK_STREAM, 0);
-    /*
-        family
-            AF_INET for IPv4
-            AF_INET6 for IPv6
-        type
-            SOCK_STREAM for TCP
-            SOCK_DGRM for UDP
-        protocol
-            (not used for internet sockets)
-    */
     if (mysocket == -1) {
         switch (errno) {
         case EPROTONOSUPPORT:
@@ -70,9 +59,12 @@ int main(int argc, char *argv[])
         exit(EXIT_FAILURE);
     }
 
+    char HTML[HTML_SIZE];
+    create_HTML_content(HTML);
+
     while (1) {
         printf("Incoming connection from %s - sending msg\n", inet_ntoa(dest.sin_addr));
-        send(connect_socket, msg, strlen(msg), 0);
+        send(connect_socket, HTML, strlen(HTML), 0);
         close(connect_socket);
         connect_socket = accept(mysocket, (sockaddr *)&dest, &socksize);
     }
@@ -80,10 +72,3 @@ int main(int argc, char *argv[])
     close(mysocket);
     return EXIT_SUCCESS;
 }
-
-/* NOTES
-- sockaddr and sockadd_in have the same size, but they interpret the bits in a
-different way
-- in the networking there's an abuse of casting for addresses and ports.
-Instead could have been used union
- */
