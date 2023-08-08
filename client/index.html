@@ -6,31 +6,118 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Alessandro Tambelini</title>
     <style>
-        h1 {
-            color: purple;
-            text-align: center;
-            font-size: 27px;
-            font-size: calc(4vw + 4vh + 2vmin);
-            font-size: clamp(27px, 4vw, 54px);
+        /* general setup START */
+        :root {
+            --clr-primary: 300, 100%, 25%;
+            --clr-neutral: 60, 19%, 92%;
+            --clr-secondary: 193, 97%, 34%;
+
+            --ff-primary: -apple-system;
+            --ff-fallback: BlinkMacSystemFont;
+
+            --fw-regular: 400;
+            --fw-semi-bold: 500;
+            --fw-bold: 700;
+
+            --fs-small: 0.875rem;
+            --fs-medium: 1rem;
+            --fs-big: 1.5rem;
+            --fs-huge: 2.5rem;
+
+            --size-100: 0.25rem;
+            --size-200: 0.5rem;
+            --size-400: 1rem;
+            --size-600: 2rem;
+            --size-800: 3rem;
+        }
+
+        @media (min-width: 35em) {
+            :root {
+                --fs-big: 2rem;
+                --fs-huge: 3.5rem;
+                --fs-medium: 1.125rem;
+            }
+        }
+
+        @media (min-width: 45em) {
+            :root {
+                --fs-big: 2.5rem;
+                --fs-huge: 4.5rem;
+                --fs-medium: 1.25rem;
+                --fs-small: 1rem;
+            }
+        }
+
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            font: inherit;
+        }
+
+        html:focus-within {
+            scroll-behavior: smooth;
+        }
+
+        html,
+        body {
+            height: 100%;
+        }
+
+        p,
+        li {
+            max-width: 60ch;
         }
 
         ul {
-            list-style: none;
-            width: 94vw;
+            list-style-type: none;
         }
 
-        ul>li {
-            font-weight: 700;
-            font-size: 18px;
-            font-size: calc(4vw + 4vh + 2vmin);
-            font-size: clamp(18px, 4vw, 36px);
+        a,
+        button {
+            cursor: pointer;
+        }
+
+        /* general setup END */
+
+        body {
+            text-rendering: optimizeSpeed;
+            line-height: 1.5;
+            margin-inline: auto;
+            font-family: var(--ff-primary), var(--ff-fallback), sans-serif;
+            width: min(650px, 100% - (var(--size-400) * 2));
+        }
+
+        h1 {
+            text-align: center;
+            color: hsl(var(--clr-primary));
+            font-size: var(--fs-huge);
+            line-height: 1.1;
+        }
+
+        #profiles {
+            margin-top: calc(var(--fs-huge) / 2);
+        }
+
+        #profiles>li {
+            font-weight: var(--fw-bold);
+            font-size: var(--fs-medium);
+        }
+
+        #snowflake {
+            margin-top: var(--fs-medium);
         }
     </style>
 </head>
 
 <body>
     <h1>Alessandro Tambellini</h1>
-    <ul>
+    <ul id="profiles">
         <li>
             <a style="color: #333;" href="https://github.com/AlessandroTambellini?tab=repositories">My GitHub
                 Profile</a>
@@ -43,6 +130,8 @@
             <a style="color: black;" href="https://twitter.com/Alessan78667092">My X Profile</a>
         </li>
     </ul>
+    <iframe id="snowflake" src="https://snowflake.torproject.org/embed.html" width="320" height="240" frameborder="0"
+        scrolling="no"></iframe>
     <!-- TODO: Draw something here with vectors -->
 </body>
 
