@@ -3,7 +3,7 @@
 
 #include <string.h>
 
-#define HTML_SIZE 8192
+#define HTML_SIZE 16384
 
 void create_HTML_content(char *HTML);
 
