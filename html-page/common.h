@@ -15,6 +15,5 @@
 #define PORTNUM 3000
 
 typedef struct sockaddr sockaddr;
-// here the common functions
 
 #endif
