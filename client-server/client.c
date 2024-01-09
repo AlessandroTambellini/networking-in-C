@@ -1,23 +1,38 @@
-#include <stdio.h>
-#include <libsocket/libinetsocket.h>
+#include <netinet/in.h>
+#include <stdio.h> 
+#include <stdlib.h> 
 #include <unistd.h>
 
-#define PORT "3000"
+#include <sys/socket.h>
+#include <sys/types.h> 
+
+#define PORT 3000
 #define MSG_SIZE 1000
 
-int main(void)
-{
-    // establish connection to server
-    int fd = create_inet_stream_socket("localhost", PORT, LIBSOCKET_IPv4, 0);
-    FILE *socket = fdopen(fd, "r");
-    
-    //  greeting
-    char res[MSG_SIZE];
-    fgets(res, MSG_SIZE, socket);
-    printf("%s", res);
+typedef struct sockaddr_in sockaddr_in;
+typedef struct sockaddr sockaddr;
+  
+int main(void) 
+{ 
+    int socketFD = socket(AF_INET, SOCK_STREAM, 0); 
+  
+    sockaddr_in server_addr = {
+      .sin_family = AF_INET, // IPv4
+      .sin_port = htons(PORT),
+      .sin_addr.s_addr = INADDR_ANY, // any IP address from local machine
+    }; 
 
-    getchar();
-    
-    fclose(socket);
-    close(fd);
+    int connection  = connect(socketFD, (sockaddr*)&server_addr, sizeof(server_addr)); 
+  
+    if (connection == -1) 
+    { 
+        perror("Unable to connect socket");
+        exit(EXIT_FAILURE);
+    } 
+  
+    char res[MSG_SIZE]; 
+    recv(socketFD, res, sizeof(res), 0); 
+  
+    printf("Server response: %s\n", res); 
+
 }
