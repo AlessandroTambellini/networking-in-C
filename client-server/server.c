@@ -1,15 +1,10 @@
 #include <arpa/inet.h>
 #include <errno.h>
 #include <netinet/in.h>
-#include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
 
-#include <sys/socket.h>
-#include <sys/types.h>
+#include "common.h"
 
-#define PORT 3000
 #define HOSTNAME_SIZE 100
 
 typedef struct sockaddr sockaddr;
@@ -30,17 +25,11 @@ int main(void)
 
     int sock = socket(AF_INET, SOCK_STREAM, 0);
     if (sock == -1) 
-    {
-        perror("Unable to create socket");
-        exit(EXIT_FAILURE);
-    }
+        HANDLE_ERROR("Unable to create socket");
 
     // bind a socket to a port
     if (bind(sock, (sockaddr *)&serv, sizeof(sockaddr)) == -1) 
-    {
-        perror("Error: unable to bind");
-        exit(EXIT_FAILURE);
-    }
+        HANDLE_ERROR("Unable to bind");
 
     char hostname[HOSTNAME_SIZE];
     gethostname(hostname, HOSTNAME_SIZE);
@@ -48,10 +37,7 @@ int main(void)
 
     // start listening
     if (listen(sock, 1) == -1) 
-    {
-        perror("Error: unable to listen for new connections");
-        exit(EXIT_FAILURE);
-    }  
+        HANDLE_ERROR("Unable to listen for new connections");
 
     char msg[] = "you connected to the server\n";
 
@@ -59,11 +45,10 @@ int main(void)
     while (1) 
     {
         connect_socket = accept(sock, (sockaddr *)&dest, &socksize);
+        
         if (connect_socket == -1) 
-        {
-            perror("Error: unable to open new socket");
-            exit(EXIT_FAILURE);
-        }
+            HANDLE_ERROR("Unable to open new socket");
+
         printf("Incoming connection from %s - sending msg\n", inet_ntoa(dest.sin_addr));
         int res = send(connect_socket, msg, strlen(msg), 0);
         if (res == -1)

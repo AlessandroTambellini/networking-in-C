@@ -1,12 +1,6 @@
 #include <netinet/in.h>
-#include <stdio.h> 
-#include <stdlib.h> 
-#include <unistd.h>
+#include "common.h"
 
-#include <sys/socket.h>
-#include <sys/types.h> 
-
-#define PORT 3000
 #define MSG_SIZE 1000
 
 typedef struct sockaddr_in sockaddr_in;
@@ -14,6 +8,8 @@ typedef struct sockaddr sockaddr;
   
 int main(void) 
 { 
+    HANDLE_ERROR("myerroooooor");
+    
     int socketFD = socket(AF_INET, SOCK_STREAM, 0); 
   
     sockaddr_in server_addr = {
@@ -25,14 +21,10 @@ int main(void)
     int connection  = connect(socketFD, (sockaddr*)&server_addr, sizeof(server_addr)); 
   
     if (connection == -1) 
-    { 
-        perror("Unable to connect socket");
-        exit(EXIT_FAILURE);
-    } 
+        HANDLE_ERROR("Unable to connect socket");
   
     char res[MSG_SIZE]; 
     recv(socketFD, res, sizeof(res), 0); 
   
     printf("Server response: %s\n", res); 
-
 }
