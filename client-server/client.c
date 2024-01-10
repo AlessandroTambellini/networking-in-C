@@ -14,12 +14,14 @@ int main(void)
       .sin_family = AF_INET, // IPv4
       .sin_port = htons(PORT),
       .sin_addr.s_addr = INADDR_ANY, // any IP address from local machine
-    }; 
+    };
 
     int connection  = connect(socketFD, (sockaddr*)&server_addr, sizeof(server_addr)); 
   
     if (connection == -1) 
         manageExit("Unable to connect socket");
+
+    printf("%sConnected to server on port %d successfully\n%s", CYAN, PORT, RESET);
   
     char res[MSG_SIZE]; 
     recv(socketFD, res, sizeof(res), 0); 

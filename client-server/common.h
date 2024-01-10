@@ -10,6 +10,10 @@
 
 #define PORT 3000
 
+#define GREEN "\e[0;32m"
+#define CYAN "\e[0;36m"
+#define RESET "\e[m"
+
 void manageExit(char *str);
 
 #endif // COMMON_H

@@ -12,15 +12,13 @@ typedef struct sockaddr_in sockaddr_in;
 
 int main(void)
 {
-    sockaddr_in dest; // socket info about the machine connecting to us
-     // socket info about our server
-    socklen_t socksize = sizeof(sockaddr_in);
-    // address setup
     sockaddr_in serv = {
         .sin_family = AF_INET,
         .sin_port = htons(PORT),
         .sin_addr.s_addr = htonl(INADDR_ANY),
     };
+    sockaddr_in dest;
+    socklen_t socksize = sizeof(sockaddr_in);
 
     int sock = socket(AF_INET, SOCK_STREAM, 0);
     if (sock == -1) 
@@ -33,6 +31,8 @@ int main(void)
     // start listening
     if (listen(sock, 1) == -1) 
         manageExit("Unable to listen for new connections");
+
+    printf("%sListening on port %d for incoming requests\n%s", GREEN, PORT, RESET);
 
     char msg[] = "you connected to the server\n";
 
