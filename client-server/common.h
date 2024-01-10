@@ -10,8 +10,6 @@
 
 #define PORT 3000
 
-#define HANDLE_ERROR(msg) \
-    perror(msg); \
-    exit(EXIT_FAILURE)
+void manageExit(char *str);
 
-#endif
+#endif // COMMON_H

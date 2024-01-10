@@ -7,9 +7,7 @@ typedef struct sockaddr_in sockaddr_in;
 typedef struct sockaddr sockaddr;
   
 int main(void) 
-{ 
-    HANDLE_ERROR("myerroooooor");
-    
+{
     int socketFD = socket(AF_INET, SOCK_STREAM, 0); 
   
     sockaddr_in server_addr = {
@@ -21,7 +19,7 @@ int main(void)
     int connection  = connect(socketFD, (sockaddr*)&server_addr, sizeof(server_addr)); 
   
     if (connection == -1) 
-        HANDLE_ERROR("Unable to connect socket");
+        manageExit("Unable to connect socket");
   
     char res[MSG_SIZE]; 
     recv(socketFD, res, sizeof(res), 0); 
