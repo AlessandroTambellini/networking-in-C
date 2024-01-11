@@ -6,54 +6,63 @@
 #include "common.h"
 
 #define HOSTNAME_SIZE 100
+#define REQ_LEN 500
+#define RES_LEN 500
 
 typedef struct sockaddr sockaddr;
 typedef struct sockaddr_in sockaddr_in;
 
 int main(void)
 {
-    sockaddr_in serv = {
+    sockaddr_in server_addr = {
         .sin_family = AF_INET,
         .sin_port = htons(PORT),
         .sin_addr.s_addr = htonl(INADDR_ANY),
     };
-    sockaddr_in dest;
+    sockaddr_in client;
     socklen_t socksize = sizeof(sockaddr_in);
 
-    int sock = socket(AF_INET, SOCK_STREAM, 0);
-    if (sock == -1) 
+    int server_socket_FD= socket(AF_INET, SOCK_STREAM, 0);
+    if (server_socket_FD== -1) 
         manageExit("Unable to create socket");
 
     // bind a socket to a port
-    if (bind(sock, (sockaddr *)&serv, sizeof(sockaddr)) == -1) 
+    if (bind(server_socket_FD, (sockaddr *)&server_addr, sizeof(sockaddr)) == -1) 
         manageExit("Unable to bind");
 
     // start listening
-    if (listen(sock, 1) == -1) 
+    if (listen(server_socket_FD, 1) == -1) 
         manageExit("Unable to listen for new connections");
 
     printf("%sListening on port %d for incoming requests\n%s", GREEN, PORT, RESET);
 
-    char msg[] = "you connected to the server\n";
+    char req[REQ_LEN];
+    char res[RES_LEN] = "random response";
 
-    int connect_socket;
+    int client_socket_FD;
     while (1) 
     {
-        connect_socket = accept(sock, (sockaddr *)&dest, &socksize);
+        client_socket_FD = accept(server_socket_FD, (sockaddr *)&client, &socksize);
         
-        if (connect_socket == -1) 
+        if (client_socket_FD == -1) 
             manageExit("Unable to open new socket");
 
-        printf("Incoming connection from %s - sending msg\n", inet_ntoa(dest.sin_addr));
-        int res = send(connect_socket, msg, strlen(msg), 0);
-        if (res == -1)
+        printf("Incoming connection from client at %s\n", inet_ntoa(client.sin_addr));
+        read(client_socket_FD, req, sizeof(req));
+        printf("%sreq: %s%s\n", CYAN, req, RESET);
+
+        int isMsgSent = 0;
+        isMsgSent = send(client_socket_FD, res, strlen(res), 0);
+        if (isMsgSent == -1)
         {
-            printf("Unable to send msg to %s\n", inet_ntoa(dest.sin_addr));
-            close(connect_socket);
+            printf("Unable to send res to %s\n", inet_ntoa(client.sin_addr));
+            close(client_socket_FD);
         }
         else
-            printf("Message sent to %s\n", inet_ntoa(dest.sin_addr));
+        {
+            printf("%sres sent: ok\n%s", GREEN, RESET);
+        }
     }
 
-    close(sock);
+    close(server_socket_FD);
 }

@@ -1,14 +1,16 @@
 #include <netinet/in.h>
+#include <string.h>
 #include "common.h"
 
 #define MSG_SIZE 1000
+#define REQ_LEN 500
 
 typedef struct sockaddr_in sockaddr_in;
 typedef struct sockaddr sockaddr;
   
 int main(void) 
 {
-    int socketFD = socket(AF_INET, SOCK_STREAM, 0); 
+    int client_socket_FD = socket(AF_INET, SOCK_STREAM, 0); 
   
     sockaddr_in server_addr = {
       .sin_family = AF_INET, // IPv4
@@ -16,15 +18,25 @@ int main(void)
       .sin_addr.s_addr = INADDR_ANY, // any IP address from local machine
     };
 
-    int connection  = connect(socketFD, (sockaddr*)&server_addr, sizeof(server_addr)); 
+    int isConnected = connect(client_socket_FD, (sockaddr*)&server_addr, sizeof(server_addr)); 
   
-    if (connection == -1) 
+    if (isConnected == -1) 
         manageExit("Unable to connect socket");
 
     printf("%sConnected to server on port %d successfully\n%s", CYAN, PORT, RESET);
   
     char res[MSG_SIZE]; 
-    recv(socketFD, res, sizeof(res), 0); 
-  
-    printf("Server response: %s\n", res); 
+    char req[REQ_LEN] = "Are you the server?";
+
+    int isMsgSent = send(client_socket_FD, req, strlen(req), 0);
+    if (isMsgSent == -1)
+    {
+      perror("Unable to send msg to server");
+    }
+    else
+    {
+      printf("%sreq: %s\n%s", GREEN, req, RESET);
+      recv(client_socket_FD, res, sizeof(res), 0); 
+      printf("%sres: %s\n%s", CYAN, res, RESET); 
+    }
 }
