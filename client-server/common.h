@@ -9,6 +9,8 @@
 #include <sys/types.h>
 
 #define PORT 3000
+#define REQ_LEN 500
+#define RES_LEN 500
 
 #define GREEN "\e[0;32m"
 #define CYAN "\e[0;36m"
