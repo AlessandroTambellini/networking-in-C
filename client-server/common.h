@@ -16,6 +16,7 @@
 #define CYAN "\e[0;36m"
 #define RESET "\e[m"
 
-void manageExit(char *str);
+#define handle_error(msg) \
+    do { perror(msg); exit(EXIT_FAILURE); } while (0)
 
 #endif // COMMON_H

@@ -18,7 +18,7 @@ int main(void)
     int isConnected = connect(client_socket_FD, (sockaddr*)&server_addr, sizeof(server_addr)); 
   
     if (isConnected == -1) 
-      manageExit("Unable to connect socket");
+      handle_error("Unable to connect socket");
 
     printf("%sConnected to server on port %d successfully\n%s", CYAN, PORT, RESET);
 
