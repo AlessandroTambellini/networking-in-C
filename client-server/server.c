@@ -10,14 +10,20 @@
 typedef struct sockaddr sockaddr;
 typedef struct sockaddr_in sockaddr_in;
 
-int main(void)
+int 
+main(void)
 {
-    sockaddr_in server_addr = {
+    // socketaddr_in vs socketaddr_un
+    sockaddr_in server_addr, client;
+    // avoid garbage values
+    memset(&server_addr, 0, sizeof(server_addr)); 
+    memset(&client, 0, sizeof(client));
+
+    server_addr = (sockaddr_in) {
         .sin_family = AF_INET,
         .sin_port = htons(PORT),
         .sin_addr.s_addr = htonl(INADDR_ANY),
     };
-    sockaddr_in client;
     socklen_t socksize = sizeof(sockaddr_in);
 
     int server_socket_FD= socket(AF_INET, SOCK_STREAM, 0);
