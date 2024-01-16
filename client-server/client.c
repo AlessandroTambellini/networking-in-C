@@ -47,13 +47,13 @@ main(void)
             perror("Unable to recevice res from server\n");
             break;
         }
+        printf("%sres: %s\n%s", CYAN, res, RESET); 
+        
         if (strcmp(req, "exit") == 0)
         {
             printf("Connection closed.\n");
             break;
         }
-
-        printf("%sres: %s\n%s", CYAN, res, RESET); 
     }
 
     close(client_socket_FD);    

@@ -12,7 +12,7 @@ void create_HTML_content(char *HTML)
     char *text_line;
     while (text_line != NULL) {
         text_line = fgets(HTML + strlen(HTML), HTML_SIZE - strlen(HTML), HTML_p);
-    }
+    }   
 
     fclose(HTML_p);
 }

@@ -65,7 +65,8 @@ main(void)
             strcpy(res, "not a valid req");
 
         int isMsgSent = 0;
-        isMsgSent = send(client_socket_FD, res, strlen(res), 0);
+        // strlen(res) + 1, means also send \0
+        isMsgSent = send(client_socket_FD, res, strlen(res) + 1, 0);
         if (isMsgSent == -1)
         {
             printf("Unable to send res to %s\n", inet_ntoa(client.sin_addr));
