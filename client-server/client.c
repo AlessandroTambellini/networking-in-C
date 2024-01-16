@@ -36,20 +36,15 @@ main(void)
         // + 1: to also send \0
         int isReqSent = send(client_socket_FD, req, strlen(req) + 1, 0); 
         if (isReqSent == -1)
-        {
-            perror("Unable to send msg to server");
-            break;
-        }
+            handle_error("Unable to send msg to server");
 
         int isResRecv = recv(client_socket_FD, res, sizeof(res), 0); 
         if (isResRecv == -1)
-        {
-            perror("Unable to recevice res from server\n");
-            break;
-        }
+            handle_error("Unable to recevice res from server");
+
         printf("%sres: %s\n%s", CYAN, res, RESET); 
         
-        if (strcmp(req, "exit") == 0)
+        if (strcmp(res, "Bye!") == 0)
         {
             printf("Connection closed.\n");
             break;

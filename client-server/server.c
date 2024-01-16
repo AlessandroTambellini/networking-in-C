@@ -72,14 +72,10 @@ main(void)
             printf("Unable to send res to %s\n", inet_ntoa(client.sin_addr));
             break;
         }
-        else if (strcmp(req, "exit") == 0)
-        {
+        printf("%sres sent: ok\n%s", GREEN, RESET);
+        
+        if (strcmp(req, "exit") == 0)
             break;
-        }
-        else
-        {
-            printf("%sres sent: ok\n%s", GREEN, RESET);
-        }
     }
 
     close(client_socket_FD);
