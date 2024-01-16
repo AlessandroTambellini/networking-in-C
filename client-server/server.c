@@ -14,11 +14,7 @@ typedef struct sockaddr_in sockaddr_in;
 int 
 main(void)
 {
-    // socketaddr_in vs socketaddr_un
-    sockaddr_in server_addr, client;
-    // avoid garbage values
-    memset(&server_addr, 0, sizeof(server_addr)); 
-    memset(&client, 0, sizeof(client));
+    sockaddr_in server_addr = {0}, client = {0};
 
     server_addr = (sockaddr_in) {
         .sin_family = AF_INET,
@@ -48,7 +44,7 @@ main(void)
     
     if (client_socket_FD == -1) 
         handle_error("Unable to open new socket");
-    printf("Client connected from IP %s on port %d\n", inet_ntoa(client.sin_addr), ntohs(client.sin_port));
+    printf("Client connected from IP %s from port %d\n", inet_ntoa(client.sin_addr), ntohs(client.sin_port));
 
     while (1)
     {   
