@@ -36,7 +36,7 @@ main(void)
     if (listen(server_socket_FD, LISTEN_BACKLOG) == -1) 
         handle_exit("Unable to listen for new connections");
 
-    printf("%sListening on port %d for incoming requests\n%s", GREEN, PORT, RESET);
+    printf(GREEN "Listening on port %d for incoming requests\n" RESET, PORT);
 
     char req[REQ_LEN];
     char res[RES_LEN];
@@ -50,9 +50,9 @@ main(void)
     while (1)
     {   
         int isReqRead = read(client_socket_FD, req, sizeof(req));
-        if (!isReqRead)
+        if (isReqRead == -1)
             handle_break("Unable to read client req");
-        printf("%sreq: %s%s\n", CYAN, req, RESET);
+        printf(CYAN "req: %s\n" RESET, req);
 
         // 1) write the res
         if (strcmp(req, GREET) == 0)
@@ -68,9 +68,9 @@ main(void)
         int isMsgSent = send(client_socket_FD, res, strlen(res) + 1, 0);
         if (isMsgSent == -1)
             handle_break("Unable to send res to client");
-        printf("%sres sent: ok\n%s", GREEN, RESET);
+        printf(GREEN "res sent: ok\n" RESET);
         
-        // 3) act after the res is send 
+        // 3) act after the res is send
         if (strcmp(res, CLOSED) == 0)
             break;
         else if (strcmp(res, OCS) == 0)

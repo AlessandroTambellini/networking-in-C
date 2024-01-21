@@ -14,6 +14,9 @@
 
 #define GREEN "\e[0;32m"
 #define CYAN "\e[0;36m"
+#define YELLOW "\e[0;33m"
+#define RED "\e[0;31m"
+#define BOLD "\e[1m"
 #define RESET "\e[m"
 
 // COMMANDS
@@ -33,9 +36,9 @@
 #define PROGRAM_SIZE 5000
 
 #define handle_exit(msg) \
-    do { perror(msg); exit(EXIT_FAILURE); } while (0)
+    do { fprintf(stderr, RED msg RESET); perror(" "); exit(EXIT_FAILURE); } while (0)
 
 #define handle_break(msg) \
-    do { perror(msg); break; } while (0)
+    do { fprintf(stderr, RED msg RESET); perror(" "); break; } while (0)
 
 #endif // COMMON_H

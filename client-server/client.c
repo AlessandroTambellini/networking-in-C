@@ -5,7 +5,7 @@
 typedef struct sockaddr_in sockaddr_in;
 typedef struct sockaddr sockaddr;
 
-void startCodingSession(int sock_FD);
+void startCodingSession(int sock_FD, char req[], char res[]);
 
 int 
 main(void) 
@@ -24,34 +24,33 @@ main(void)
     if (isConnected == -1) 
         handle_exit("Unable to connect socket");
 
-    printf("%sConnected to server on port %d successfully\n%s", CYAN, PORT, RESET);
+    printf(CYAN "Connected to server on port %d successfully\n" RESET, PORT);
 
     char res[RES_LEN]; 
     char req[REQ_LEN];
   
     while (1)
     {
+        // 1) write the req
         printf("req: ");
         scanf("%s", req);
-
-        // 1) manage the req
 
         // 2) send the req
         int isReqSent = send(client_socket_FD, req, strlen(req) + 1, 0); 
         if (isReqSent == -1)
             handle_break("Unable to send msg to server");
 
-        int isResRecv = recv(client_socket_FD, res, sizeof(res), 0); 
+        // 3) get the res
+        int isResRecv = recv(client_socket_FD, res, strlen(res), 0); 
         if (isResRecv == -1)
             handle_break("Unable to recevice res from server");
+        printf(CYAN "res: %s\n" RESET, res); 
 
-        printf("%sres: %s\n%s", CYAN, res, RESET); 
-
-        // 3) manage the res
+        // 3) act after the res is recv
         if (strcmp(res, OCS) == 0)
         {
             printf("Opening coding session...\n");
-            // startCodingSession(client_socket_FD);
+            startCodingSession(client_socket_FD, req, res);
         }
         else if (strcmp(res, CLOSED) == 0)
         {
@@ -63,19 +62,21 @@ main(void)
     close(client_socket_FD);    
 }
 
-void startCodingSession(int sock_FD)
+void startCodingSession(int sock_FD, char req[], char res[])
 {
-    char codeLine[REQ_LEN];
-    char res[RES_LEN];
-    while (1)
+    printf(YELLOW " " BOLD);
+    while (1) 
     {
         printf("\n> ");
-        scanf("%s", codeLine);
-        int isCodeLineSent = send(sock_FD, codeLine, strlen(codeLine) + 1, 0);
-        if (!isCodeLineSent)
-            printf("Unable to send the code line\nPlease, try again");
+        scanf("%s", req);
+        int isReqSend = send(sock_FD, req, strlen(req) + 1, 0);
+        if (isReqSend == -1)
+            handle_break("Unable to send the code line");
         
-        int isResRecv = recv(sock_FD, res, sizeof(res), 0);
-        printf("CS res: %s\n", res);
+        int isResRecv = recv(sock_FD, res, strlen(res), 0);
+        if (isResRecv == -1)
+            handle_break("Unable to recv res");
+        printf("CS res: %s", res);
     }
+    printf(RESET);
 }
