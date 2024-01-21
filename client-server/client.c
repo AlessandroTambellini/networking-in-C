@@ -22,7 +22,7 @@ main(void)
 
     int isConnected = connect(client_socket_FD, (sockaddr*)&server_addr, sizeof(server_addr)); 
     if (isConnected == -1) 
-        handle_error("Unable to connect socket");
+        handle_exit("Unable to connect socket");
 
     printf("%sConnected to server on port %d successfully\n%s", CYAN, PORT, RESET);
 
@@ -39,11 +39,11 @@ main(void)
         // 2) send the req
         int isReqSent = send(client_socket_FD, req, strlen(req) + 1, 0); 
         if (isReqSent == -1)
-            handle_error("Unable to send msg to server");
+            handle_break("Unable to send msg to server");
 
         int isResRecv = recv(client_socket_FD, res, sizeof(res), 0); 
         if (isResRecv == -1)
-            handle_error("Unable to recevice res from server");
+            handle_break("Unable to recevice res from server");
 
         printf("%sres: %s\n%s", CYAN, res, RESET); 
 

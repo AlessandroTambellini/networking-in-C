@@ -27,14 +27,14 @@ main(void)
 
     int server_socket_FD = socket(AF_INET, SOCK_STREAM, 0);
     if (server_socket_FD == -1) 
-        handle_error("Unable to create socket");
+        handle_exit("Unable to create socket");
 
     if (bind(server_socket_FD, (sockaddr *)&server_addr, sizeof(sockaddr)) == -1) 
-        handle_error("Unable to bind");
+        handle_exit("Unable to bind");
 
     // start listening, and just 1 client can connect
     if (listen(server_socket_FD, LISTEN_BACKLOG) == -1) 
-        handle_error("Unable to listen for new connections");
+        handle_exit("Unable to listen for new connections");
 
     printf("%sListening on port %d for incoming requests\n%s", GREEN, PORT, RESET);
 
@@ -44,12 +44,14 @@ main(void)
     int client_socket_FD = accept(server_socket_FD, (sockaddr *)&client_addr, &client_addr_size);
     
     if (client_socket_FD == -1) 
-        handle_error("Unable to open new socket");
+        handle_exit("Unable to open new socket");
     printf("Client connected from IP %s from port %d\n", inet_ntoa(client_addr.sin_addr), ntohs(client_addr.sin_port));
 
     while (1)
     {   
-        read(client_socket_FD, req, sizeof(req));
+        int isReqRead = read(client_socket_FD, req, sizeof(req));
+        if (!isReqRead)
+            handle_break("Unable to read client req");
         printf("%sreq: %s%s\n", CYAN, req, RESET);
 
         // 1) write the res
@@ -65,7 +67,7 @@ main(void)
         // 2) send the res
         int isMsgSent = send(client_socket_FD, res, strlen(res) + 1, 0);
         if (isMsgSent == -1)
-            handle_error("Unable to send res to client");
+            handle_break("Unable to send res to client");
         printf("%sres sent: ok\n%s", GREEN, RESET);
         
         // 3) act after the res is send 

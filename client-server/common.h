@@ -32,7 +32,10 @@
 
 #define PROGRAM_SIZE 5000
 
-#define handle_error(msg) \
+#define handle_exit(msg) \
     do { perror(msg); exit(EXIT_FAILURE); } while (0)
+
+#define handle_break(msg) \
+    do { perror(msg); break; } while (0)
 
 #endif // COMMON_H
