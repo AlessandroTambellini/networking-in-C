@@ -1,0 +1,8 @@
+COMMANDS:
+    - GREET: just for testing connection
+    - CODE: start coding session
+    - END: end coding session
+    - CLOSE: close connection
+
+INFO:
+    - max req length: 499
