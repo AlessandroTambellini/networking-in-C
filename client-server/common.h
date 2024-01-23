@@ -1,6 +1,7 @@
 #ifndef COMMON_H
 #define COMMON_H
 
+#define  _GNU_SOURCE
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -33,7 +34,11 @@
 // list all the possible commands to the user
 #define HELP "HELP"
 
+// read: strlen
+// recv: sizeof
+
 #define PROGRAM_SIZE 5000
+#define HELP_PATH "./help.txt"
 
 #define handle_exit(msg) \
     do { fprintf(stderr, RED msg RESET); perror(" "); exit(EXIT_FAILURE); } while (0)
