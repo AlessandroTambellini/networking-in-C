@@ -68,14 +68,17 @@ main(void)
             strcpy(res, "not a valid req");
 
         // 2) send the res
-        int isMsgSent = send(client_socket_FD, res, strlen(res) + 1, 0);
-        if (isMsgSent == -1)
+        int isResSent = send(client_socket_FD, res, strlen(res) + 1, 0);
+        if (isResSent == -1)
             handle_break("Unable to send res to client");
         printf(GREEN "res sent: ok\n" RESET);
         
         // 3) act after the res is send
         if (strcmp(res, OCS) == 0)
+        {
             printf("Listening for incoming code\n");
+            readCode(client_socket_FD, req, res);
+        }
         else if (strcmp(res, CLOSED) == 0)
             break;
     }
@@ -88,30 +91,20 @@ void readCode(int sock_FD, char req[], char res[])
 {
     char program[PROGRAM_SIZE] = {0};
 
-    strcpy(res, "OCS");
-    send(sock_FD, res, strlen(res) + 1, 0);
-
     while (1)
     {
-        int isReqRead = read(sock_FD, req, strlen(req));
-        if (!isReqRead)
-        {
-            strcpy(res, "Unable to read the req");
-            send(sock_FD, res, strlen(res) + 1, 0);
-        }
-        else if (strcmp(req, "END"))
-            break;
-        else if (strlen(program) + strlen(req) > PROGRAM_SIZE)
-        {
-            strcpy(res, "Reached max dimension of the program");
-            send(sock_FD, res, strlen(res) + 1, 0);
-            break;
-        }
+        int isReqRead = read(sock_FD, req,  REQ_LEN);
+        
+        if (isReqRead == -1)
+            strcpy(res, READ_ERR);
         else
-            strcat(program, req);
-    }
+            strcpy(res, READ_OK);
 
-    printf("program: %s\n", program);
+        int isResSent = send(sock_FD, res, strlen(res) + 1, 0);
+        if (isResSent == -1)
+            handle_break("Unable to send res to client");
+        printf(GREEN "res sent: ok\n" RESET);
+    }
 }
 
 void getHelpTxt(char res[])

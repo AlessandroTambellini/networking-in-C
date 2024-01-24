@@ -16,26 +16,27 @@
 #define GREEN "\e[0;32m"
 #define CYAN "\e[0;36m"
 #define YELLOW "\e[0;33m"
+#define MAGENTA "\e[0;35m"
 #define RED "\e[0;31m"
 #define BOLD "\e[1m"
 #define RESET "\e[m"
 
 // COMMANDS
 // just for testing purpose
-#define GREET "GREET"
-// Opening Coding Session
-#define OCS "OCS"
-#define CODE "CODE"
-// end of code
-#define END "END"
+#define GREET "GREET" // req
+// Open Coding Session
+#define CODE "CODE" // req
+#define OCS "OCS"  // res
+#define READ_ERR "READ_ERR"
+#define READ_OK "READ_OK"
+// stop writing code
+#define END "END" // req
+#define ENDED "ENDED" // res
 // close connection
-#define CLOSE "CLOSE"
-#define CLOSED "CLOSED"
+#define CLOSE "CLOSE" // req
+#define CLOSED "CLOSED" // res
 // list all the possible commands to the user
 #define HELP "HELP"
-
-// read: strlen
-// recv: sizeof
 
 #define PROGRAM_SIZE 5000
 #define HELP_PATH "./help.txt"

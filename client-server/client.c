@@ -68,21 +68,21 @@ main(void)
 
 void startCodingSession(int sock_FD, char req[], char res[])
 {
-    printf(YELLOW " " BOLD "\n");
-    while (1) 
+    while (1)
     {
-        printf("> ");
+        printf(YELLOW " " BOLD "> ");
         fgets(req, REQ_LEN, stdin);
         req[strcspn(req, "\n")] = 0;
 
         int isReqSend = send(sock_FD, req, strlen(req) + 1, 0);
         if (isReqSend == -1)
             handle_break("Unable to send the code line");
-        // 
-        // int isResRecv = recv(sock_FD, res, strlen(res), 0);
-        // if (isResRecv == -1)
-        //     handle_break("Unable to recv res");
-        // printf("CS res: %s", res);
+
+        int isResRecv = recv(sock_FD, res, RES_LEN, 0);
+        if (isResRecv == -1)
+            handle_break("Unable to recv res");
+        
+        printf(MAGENTA "< res: %s\n" RESET, res);
     }
     printf(RESET);
 }
