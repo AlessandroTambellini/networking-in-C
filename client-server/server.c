@@ -11,8 +11,11 @@
 typedef struct sockaddr sockaddr;
 typedef struct sockaddr_in sockaddr_in;
 
-void readCode(int sock_FD, char req[], char res[]);
+void openCodingSession(int sock_FD, char req[], char res[]);
 void getHelpTxt(char res[]);
+char *execProgram(char program[]);
+char *clearProgram(char program[]);
+char *addLine(char program[],char req[], size_t program_len, size_t req_len);
 
 int 
 main(void)
@@ -59,9 +62,9 @@ main(void)
         if (strcmp(req, GREET) == 0)
             strcpy(res, "Hello!");
         else if (strcmp(req, CODE) == 0)
-            strcpy(res, OCS);
+            openCodingSession(client_socket_FD, req, res);
         else if (strcmp(req, CLOSE) == 0)
-            strcpy(res, CLOSED);
+            break;
         else if (strcmp(req, HELP) == 0)
             getHelpTxt(res);
         else
@@ -72,39 +75,58 @@ main(void)
         if (isResSent == -1)
             handle_break("Unable to send res to client");
         printf(GREEN "res sent: ok\n" RESET);
-        
-        // 3) act after the res is send
-        if (strcmp(res, OCS) == 0)
-        {
-            printf("Listening for incoming code\n");
-            readCode(client_socket_FD, req, res);
-        }
-        else if (strcmp(res, CLOSED) == 0)
-            break;
     }
+
+    if (strcmp(req, CLOSE) == 0)
+        strcpy(res, CLOSE_OK);
+    int isResSent = send(client_socket_FD, res, strlen(res) + 1, 0);
+    if (isResSent == -1)
+        handle_break("Unable to send res to client");
+    printf(GREEN "res sent: ok\n" RESET);
 
     close(client_socket_FD);
     close(server_socket_FD);
 }
 
-void readCode(int sock_FD, char req[], char res[])
+void openCodingSession(int sock_FD, char req[], char res[])
 {
+    strcpy(res, OCS);
+    int isResSent = send(sock_FD, res, strlen(res) + 1, 0);
+    if (isResSent == -1)
+        handle_exit("Unable to send res to client");
+    printf(GREEN "res sent: ok\n" RESET);
+
     char program[PROGRAM_SIZE] = {0};
 
     while (1)
     {
         int isReqRead = read(sock_FD, req,  REQ_LEN);
-        
         if (isReqRead == -1)
             strcpy(res, READ_ERR);
+        
+        // 1) read req, act consequently and write the res
+        if (strcmp(req, EXEC) == 0)
+            strcpy(res, execProgram(program));
+        else if (strcmp(req, CLEAR) == 0)
+            strcpy(res, clearProgram(program));
+        else if (strcmp(req, END) == 0)
+            break;
         else
-            strcpy(res, READ_OK);
+            strcpy(res, addLine(program, req, strlen(program), strlen(req)));
 
+        // 2) send the res
         int isResSent = send(sock_FD, res, strlen(res) + 1, 0);
         if (isResSent == -1)
             handle_break("Unable to send res to client");
-        printf(GREEN "res sent: ok\n" RESET);
+        printf(MAGENTA "res sent: ok\n" RESET);
     }
+
+    if (strcmp(req, END) == 0)
+        strcpy(res, END_OK);
+    isResSent = send(sock_FD, res, strlen(res) + 1, 0);
+    if (isResSent == -1)
+        handle_break("Unable to send res to client");
+    printf(GREEN "res sent: ok\n" RESET);
 }
 
 void getHelpTxt(char res[])
@@ -126,4 +148,29 @@ void getHelpTxt(char res[])
     res[help_len] = '\0';
 
     fclose(help_file);
+}
+
+char *execProgram(char program[])
+{
+    // fake res
+    return EXEC_OK;
+    // TODO: build the compiler
+}
+
+char *clearProgram(char program[])
+{
+    memset(program, 0, PROGRAM_SIZE);
+    if (strlen(program) == 0)
+        return CLEAR_OK;
+    else
+        return CLEAR_ERR; 
+}
+
+char *addLine(char program[], char req[], size_t program_len, size_t req_len)
+{
+    if ((program_len + req_len + 1) > PROGRAM_SIZE)
+        return ADD_ERR;
+
+    strcat(program, req);
+    return ADD_OK;
 }

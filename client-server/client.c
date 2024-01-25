@@ -52,25 +52,24 @@ main(void)
 
         // 3) act after the res is recv
         if (strcmp(res, OCS) == 0)
-        {
-            printf("Opening coding session...\n");
             startCodingSession(client_socket_FD, req, res);
-        }
-        else if (strcmp(res, CLOSED) == 0)
-        {
-            printf("Connection closed.\n");
+        else if (strcmp(res, CLOSE_OK) == 0)
             break;
-        }
     }
+
+    if (strcmp(res, CLOSE_OK) == 0)
+        printf("Connection closed.\n");
 
     close(client_socket_FD);    
 }
 
 void startCodingSession(int sock_FD, char req[], char res[])
 {
+    printf("\n[TERMINAL_OPEN]\n");
+
     while (1)
     {
-        printf(YELLOW " " BOLD "> ");
+        printf(YELLOW "\t" BOLD "> ");
         fgets(req, REQ_LEN, stdin);
         req[strcspn(req, "\n")] = 0;
 
@@ -82,7 +81,27 @@ void startCodingSession(int sock_FD, char req[], char res[])
         if (isResRecv == -1)
             handle_break("Unable to recv res");
         
-        printf(MAGENTA "< res: %s\n" RESET, res);
+        // just for debugging for now
+        printf(MAGENTA "\t" "< ");
+        if (strcmp(res, READ_ERR) == 0)
+            printf("Server unable to read code line");
+        else if (strcmp(res, ADD_ERR) == 0)
+            printf("Reached max program size: %d", PROGRAM_SIZE);
+        else if (strcmp(res, EXEC_ERR) == 0)
+            printf("Program result: ERROR");
+        else if (strcmp(res, EXEC_OK) == 0)
+            printf("Program result: RESULT");
+        else if (strcmp(res, CLEAR_ERR) == 0)
+            printf("Server unable to clear program");
+        else if (strcmp(res, END_OK) == 0)
+            break;
+        else
+            printf("ok");
+        printf("\n");
     }
-    printf(RESET);
+
+    if (strcmp(res, END_OK) == 0)
+        printf("ok");
+
+    printf(RESET "\n[TERMINAL_CLOSE]\n\n");
 }
