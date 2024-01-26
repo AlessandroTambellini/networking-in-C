@@ -55,6 +55,5 @@ dkms.conf
 # VS Code settings
 .vscode/
 
-TODO.txt
 test.c
 *.out

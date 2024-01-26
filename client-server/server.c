@@ -15,7 +15,8 @@ void openCodingSession(int sock_FD, char req[], char res[]);
 void getHelpTxt(char res[]);
 char *execProgram(char program[]);
 char *clearProgram(char program[]);
-char *addLine(char program[],char req[], size_t program_len, size_t req_len);
+char *addLine(char program[], char req[], size_t program_len, size_t req_len);
+void sendRes(int sock_FD, char res[], size_t res_len);
 
 int 
 main(void)
@@ -36,14 +37,10 @@ main(void)
     if (bind(server_socket_FD, (sockaddr *)&server_addr, sizeof(sockaddr)) == -1) 
         handle_exit("Unable to bind");
 
-    // start listening, and just 1 client can connect
     if (listen(server_socket_FD, LISTEN_BACKLOG) == -1) 
         handle_exit("Unable to listen for new connections");
 
     printf(GREEN "Listening on port %d for incoming requests\n" RESET, PORT);
-
-    char req[REQ_LEN];
-    char res[RES_LEN];
 
     int client_socket_FD = accept(server_socket_FD, (sockaddr *)&client_addr, &client_addr_size);
     
@@ -51,9 +48,11 @@ main(void)
         handle_exit("Unable to open new socket");
     printf("Client connected from IP %s from port %d\n", inet_ntoa(client_addr.sin_addr), ntohs(client_addr.sin_port));
 
+    char req[REQ_LEN], res[RES_LEN];
+    int isResSent = 0, isReqRead = 0;
     while (1)
     {   
-        int isReqRead = read(client_socket_FD, req, REQ_LEN);
+        isReqRead = read(client_socket_FD, req, REQ_LEN);
         if (isReqRead == -1)
             handle_break("Unable to read client req");
         printf(CYAN "req: %s\n" RESET, req);
@@ -68,33 +67,22 @@ main(void)
         else if (strcmp(req, HELP) == 0)
             getHelpTxt(res);
         else
-            strcpy(res, "not a valid req");
+            strcpy(res, REQ_INVALID);
 
+        // TOFIX: if I'm in coding session and I close it, I send the res that I closed it, but then the code jumps here and the same res is sent again
         // 2) send the res
-        int isResSent = send(client_socket_FD, res, strlen(res) + 1, 0);
-        if (isResSent == -1)
-            handle_break("Unable to send res to client");
-        printf(GREEN "res sent: ok\n" RESET);
+        sendRes(client_socket_FD, res, strlen(res) + 1);
     }
-
-    if (strcmp(req, CLOSE) == 0)
-        strcpy(res, CLOSE_OK);
-    int isResSent = send(client_socket_FD, res, strlen(res) + 1, 0);
-    if (isResSent == -1)
-        handle_break("Unable to send res to client");
-    printf(GREEN "res sent: ok\n" RESET);
 
     close(client_socket_FD);
     close(server_socket_FD);
+    printf("Connection closed.\n");
 }
 
 void openCodingSession(int sock_FD, char req[], char res[])
 {
     strcpy(res, OCS);
-    int isResSent = send(sock_FD, res, strlen(res) + 1, 0);
-    if (isResSent == -1)
-        handle_exit("Unable to send res to client");
-    printf(GREEN "res sent: ok\n" RESET);
+    sendRes(sock_FD, res, strlen(res) + 1);
 
     char program[PROGRAM_SIZE] = {0};
 
@@ -107,6 +95,9 @@ void openCodingSession(int sock_FD, char req[], char res[])
         // 1) read req, act consequently and write the res
         if (strcmp(req, EXEC) == 0)
             strcpy(res, execProgram(program));
+        else if (strcmp(req, PRINT) == 0)
+            // TOFIX: I copy the program and sent it, but is fine only if it's a program less than 500 chars. But I do not handle this and an overflow is gonna happen because strcpy does not truncate the string to strlen - 2 and add 0 at strlen - 1
+            strcpy(res, program);
         else if (strcmp(req, CLEAR) == 0)
             strcpy(res, clearProgram(program));
         else if (strcmp(req, END) == 0)
@@ -115,18 +106,12 @@ void openCodingSession(int sock_FD, char req[], char res[])
             strcpy(res, addLine(program, req, strlen(program), strlen(req)));
 
         // 2) send the res
-        int isResSent = send(sock_FD, res, strlen(res) + 1, 0);
-        if (isResSent == -1)
-            handle_break("Unable to send res to client");
-        printf(MAGENTA "res sent: ok\n" RESET);
+        sendRes(sock_FD, res, strlen(res) + 1);
     }
 
     if (strcmp(req, END) == 0)
         strcpy(res, END_OK);
-    isResSent = send(sock_FD, res, strlen(res) + 1, 0);
-    if (isResSent == -1)
-        handle_break("Unable to send res to client");
-    printf(GREEN "res sent: ok\n" RESET);
+    sendRes(sock_FD, res, strlen(res) + 1);
 }
 
 void getHelpTxt(char res[])
@@ -173,4 +158,11 @@ char *addLine(char program[], char req[], size_t program_len, size_t req_len)
 
     strcat(program, req);
     return ADD_OK;
+}
+
+void sendRes(int sock_FD, char res[], size_t res_len)
+{
+    if (send(sock_FD, res, res_len, 0) == -1)
+        handle_exit("Unable to send res to client");
+    printf(GREEN "res sent: ok\n" RESET);
 }

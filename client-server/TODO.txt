@@ -1,0 +1,7 @@
+- I get `Unable to bind: Address already in use` if I close the server before the client
+- I brutaly handle trasmission and reception of msgs. I just exit the while or exit the program.
+
+- **UX**
+    - when I type left/right arrow, move the cursor instead of printing ^[[D
+    - when I type top/bottom arrow, paste prev/next command
+

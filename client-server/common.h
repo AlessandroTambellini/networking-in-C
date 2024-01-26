@@ -22,14 +22,16 @@
 #define RESET "\e[m"
 
 // COMMANDS
-// just to test the server is able to respond
-#define GREET "GREET" // req
+// greet, just to test the server is able to respond
+#define GREET "GREET" 
+#define REQ_INVALID "REQ_INVALID"
 // Open Coding Session
-#define CODE "CODE" // req
-#define OCS "OCS"  // res
+#define OCS "OCS"
+#define CODE "CODE"
 #define READ_ERR "READ_ERR"
 #define ADD_OK "ADD_OK"
 #define ADD_ERR "ADD_ERR"
+#define PRINT "PRINT"
 // clear code written so far
 #define CLEAR "CLEAR"
 #define CLEAR_OK "CLEAR_OK"
@@ -43,7 +45,6 @@
 #define END_OK "END_OK" // res
 // close connection
 #define CLOSE "CLOSE" // req
-#define CLOSE_OK "CLOSE_OK" // res
 // list all the possible commands to the user
 #define HELP "HELP"
 

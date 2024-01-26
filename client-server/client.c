@@ -27,40 +27,40 @@ main(void)
     printf(CYAN "Connected to server on port %d successfully\n" RESET, PORT);
     printf("Type HELP in the req to know the commands\n\n");
 
-    char res[RES_LEN]; 
-    char req[REQ_LEN];
-  
+    char res[RES_LEN], req[REQ_LEN];
+    int isReqSent = 0, isResRecv = 0;
+
     while (1)
     {
-        // 1) write the req
         printf("req: ");
         // no problem with buffer overflows because there's always one between '\0' or '\n'
         fgets(req, REQ_LEN, stdin); 
         req[strcspn(req, "\n")] = 0;
         // 
 
-        // 2) send the req
-        int isReqSent = send(client_socket_FD, req, strlen(req) + 1, 0); 
+        // 1) send the req
+        isReqSent = send(client_socket_FD, req, strlen(req) + 1, 0); 
         if (isReqSent == -1)
             handle_break("Unable to send msg to server");
 
-        // 3) get the res
-        int isResRecv = recv(client_socket_FD, res, RES_LEN, 0); 
+        // 2) get the res
+        isResRecv = recv(client_socket_FD, res, RES_LEN, 0); 
         if (isResRecv == -1)
             handle_break("Unable to recevice res from server");
-        printf(CYAN "res: %s\n" RESET, res); 
 
         // 3) act after the res is recv
-        if (strcmp(res, OCS) == 0)
+        if (strcmp(req, GREET) == 0)
+            printf(CYAN "res: %s\n" RESET, res);
+        else if (strcmp(res, REQ_INVALID) == 0)
+            printf(RED "res: %s\n" RESET, res);
+        else if (strcmp(res, OCS) == 0)
             startCodingSession(client_socket_FD, req, res);
-        else if (strcmp(res, CLOSE_OK) == 0)
+        else if (strcmp(req, CLOSE) == 0)
             break;
     }
 
-    if (strcmp(res, CLOSE_OK) == 0)
-        printf("Connection closed.\n");
-
     close(client_socket_FD);    
+    printf("Connection closed.\n");
 }
 
 void startCodingSession(int sock_FD, char req[], char res[])
@@ -73,8 +73,8 @@ void startCodingSession(int sock_FD, char req[], char res[])
         fgets(req, REQ_LEN, stdin);
         req[strcspn(req, "\n")] = 0;
 
-        int isReqSend = send(sock_FD, req, strlen(req) + 1, 0);
-        if (isReqSend == -1)
+        int isReqSent = send(sock_FD, req, strlen(req) + 1, 0);
+        if (isReqSent == -1)
             handle_break("Unable to send the code line");
 
         int isResRecv = recv(sock_FD, res, RES_LEN, 0);
@@ -93,6 +93,8 @@ void startCodingSession(int sock_FD, char req[], char res[])
             printf("Program result: RESULT");
         else if (strcmp(res, CLEAR_ERR) == 0)
             printf("Server unable to clear program");
+        else if (strcmp(req, PRINT) == 0)
+            printf("%s", res);
         else if (strcmp(res, END_OK) == 0)
             break;
         else
