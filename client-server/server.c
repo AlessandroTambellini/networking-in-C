@@ -99,7 +99,7 @@ void openCodingSession(int sock_FD, char req[], char res[])
         else if (strcmp(req, PRINT) == 0)
         {
             // TOFIX: I copy the program and sent it, but is fine only if it's a program less than 500 chars. But I do not handle this and an overflow is gonna happen because strcpy does not truncate the string to strlen - 2 and add 0 at strlen - 1
-            //  SOLUTION: I need to send the program in chunks of 500 chars
+            //  SOLUTION: I need to send the program in chunks of 499 chars
             strcpy(res, program);
         }
         else if (strcmp(req, CLEAR) == 0)
