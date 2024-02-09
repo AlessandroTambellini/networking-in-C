@@ -51,6 +51,8 @@ main(void)
         // 3) act after the res is recv
         if (strcmp(req, GREET) == 0)
             printf(CYAN "res: %s\n" RESET, res);
+        else if (strcmp(req, HELP) == 0)
+            printf(CYAN "%s\n" RESET, res);
         else if (strcmp(res, REQ_INVALID) == 0)
             printf(RED "res: %s\n" RESET, res);
         else if (strcmp(res, OCS) == 0)
@@ -70,6 +72,7 @@ void startCodingSession(int sock_FD, char req[], char res[])
     while (1)
     {
         printf(YELLOW "\t" BOLD "> ");
+        /* if the req len > 499 chars, the exceeding chars are not deleted, but stored for the next req */
         fgets(req, REQ_LEN, stdin);
         req[strcspn(req, "\n")] = 0;
 
@@ -81,7 +84,6 @@ void startCodingSession(int sock_FD, char req[], char res[])
         if (isResRecv == -1)
             handle_break("Unable to recv res");
         
-        // just for debugging for now
         printf(MAGENTA "\t" "< ");
         if (strcmp(res, READ_ERR) == 0)
             printf("Server unable to read code line");

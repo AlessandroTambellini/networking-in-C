@@ -1,7 +1,15 @@
 - I get `Unable to bind: Address already in use` if I close the server before the client
 - I brutaly handle trasmission and reception of msgs. I just exit the while or exit the program.
+- solve the problem of REQ_INVALID
+- read the comments
 
-- **UX**
-    - when I type left/right arrow, move the cursor instead of printing ^[[D
-    - when I type top/bottom arrow, paste prev/next command
+TERMINAL
+    - PRINT:
+        - print the program in a nice format. So, on separate lines
+        - send the program in chunks of 500 chars
+    - enable basic keys:
+        - if I enter up arrow, the previous command shows
+        - if I enter down arrow, the successive command shows
+        - if I enter left arrow, move cursor to the left
+        - if I enter right arrow, move cursor to the right
 

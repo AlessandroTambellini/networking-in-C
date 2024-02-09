@@ -69,9 +69,10 @@ main(void)
         else
             strcpy(res, REQ_INVALID);
 
-        // TOFIX: if I'm in coding session and I close it, I send the res that I closed it, but then the code jumps here and the same res is sent again
         // 2) send the res
-        sendRes(client_socket_FD, res, strlen(res) + 1);
+        // because inside openCodingSession() is already sent the res
+        if (strcmp(req, END) != 0)
+            sendRes(client_socket_FD, res, strlen(res) + 1);
     }
 
     close(client_socket_FD);
@@ -96,8 +97,11 @@ void openCodingSession(int sock_FD, char req[], char res[])
         if (strcmp(req, EXEC) == 0)
             strcpy(res, execProgram(program));
         else if (strcmp(req, PRINT) == 0)
+        {
             // TOFIX: I copy the program and sent it, but is fine only if it's a program less than 500 chars. But I do not handle this and an overflow is gonna happen because strcpy does not truncate the string to strlen - 2 and add 0 at strlen - 1
+            //  SOLUTION: I need to send the program in chunks of 500 chars
             strcpy(res, program);
+        }
         else if (strcmp(req, CLEAR) == 0)
             strcpy(res, clearProgram(program));
         else if (strcmp(req, END) == 0)
@@ -117,7 +121,7 @@ void openCodingSession(int sock_FD, char req[], char res[])
 void getHelpTxt(char res[])
 {
     FILE *help_file = fopen(HELP_PATH, "r");
-    if (help_file == NULL)
+    if (NULL == help_file)
     {
         strcpy(res, "Sorry, unable to display the help guide");
         return;
