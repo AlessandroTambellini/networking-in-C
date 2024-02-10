@@ -29,27 +29,30 @@ main(void)
     printf("Type HELP in the req to know the commands\n\n");
 
     char res[RES_LEN], req[REQ_LEN];
-    ssize_t req_len = 0, res_len = 0;
+    ssize_t req_len = REQ_LEN, res_len = 0;
+    int ask_again = 0;
 
     while (1)
     {
         printf("req: ");
-        // no problem with buffer overflows because there's always one between '\0' or '\n'
-        fgets(req, REQ_LEN, stdin); 
-        req[strcspn(req, "\n")] = 0;
-        // 
+
+        do
+        {
+            // no problem with buffer overflows because there's always one between '\0' or '\n'
+            req[REQ_LEN - 1] = 'j';
+            // fgets adds \0 at the end of the string, even if is overflowing
+            fgets(req, REQ_LEN, stdin);
+            ask_again = req[REQ_LEN - 1] == 'j' ? 0 : 1;
+            req[strcspn(req, "\n")] = '\0';
+        } while (ask_again);
+
+        // TODO: tell the user the req was too long
+        
 
         // 1) send the req
         req_len = send(client_socket_FD, req, strlen(req) + 1, 0); 
         if (req_len == -1)
             handle_break("Unable to send msg to server");
-
-        // immediately close the connection on the client
-        // if (strcmp(req, CLOSE) == 0)
-        // {
-        //     close(client_socket_FD);
-        //     break;
-        // }
 
         // 2) get the res
         res_len = recv(client_socket_FD, res, RES_LEN, 0); 
