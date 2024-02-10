@@ -44,6 +44,13 @@ main(void)
         if (req_len == -1)
             handle_break("Unable to send msg to server");
 
+        // immediately close the connection on the client
+        // if (strcmp(req, CLOSE) == 0)
+        // {
+        //     close(client_socket_FD);
+        //     break;
+        // }
+
         // 2) get the res
         res_len = recv(client_socket_FD, res, RES_LEN, 0); 
         if (res_len == -1)
@@ -60,6 +67,8 @@ main(void)
             startCodingSession(client_socket_FD, req, res);
         else if (strcmp(req, CLOSE) == 0)
             break;
+        
+        memset(res, 0, RES_LEN);
     }
 
     close(client_socket_FD);    

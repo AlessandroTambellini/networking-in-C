@@ -6,6 +6,7 @@
 - isReqSent and isResRecv should be size_t
 - if I enter empty space after a command, the command results as not valid (REQ_INVALID)
 - if I enter PRINT before having written any code, the terminal is stacked
+- when you close the coding session, the program is deleted
 
 TERMINAL
     - PRINT:

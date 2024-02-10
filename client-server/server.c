@@ -20,9 +20,11 @@ execProgram(char *res);
 void 
 clearProgram(char program[], size_t *program_size, char *res);
 void 
-addLine(char program[], char req[], size_t program_len, size_t req_len, size_t *program_size, char *res);
+addLine(char program[], char req[], size_t req_len,  size_t *program_size, char *res);
 void 
 sendRes(int sock_FD, char res[], size_t res_len);
+void
+sendProgramChunks(int sock_FD, char *res, char *program);
 
 int 
 main(void)
@@ -36,9 +38,15 @@ main(void)
     };
     socklen_t client_addr_size = sizeof(sockaddr_in);
 
+    int opt = 1;
     int server_socket_FD = socket(AF_INET, SOCK_STREAM, 0);
     if (server_socket_FD == -1) 
         handle_exit("Unable to create socket");
+
+    // Set socket option to allow address reuse --> avoid "Unable to bind : Address already in use" error
+    if (setsockopt(server_socket_FD, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) == -1) {
+        handle_exit("Unable to reuse address");
+    }
 
     if (bind(server_socket_FD, (sockaddr *)&server_addr, sizeof(sockaddr)) == -1) 
         handle_exit("Unable to bind");
@@ -79,7 +87,7 @@ main(void)
         sendRes(client_socket_FD, res, strlen(res) + 1);
     }
 
-    close(client_socket_FD);
+    // close(client_socket_FD);
     close(server_socket_FD);
     printf("Connection closed.\n");
 }
@@ -90,6 +98,7 @@ void openCodingSession(int sock_FD, char req[], char res[])
     sendRes(sock_FD, res, strlen(res) + 1);
 
     ssize_t req_len = 0;
+    // I need to use a variable instead of strlen(program) because otherwise I cannot calculate the program length inside a function
     size_t program_size = 0;
     char program[PROGRAM_SIZE] = {0};
 
@@ -105,6 +114,7 @@ void openCodingSession(int sock_FD, char req[], char res[])
         else if (strcmp(req, PRINT) == 0)
         {
             //  TOREVIEW: send the program in chunks of 255 chars
+
             if (program_size == 0)
             {
                 strcpy(res, program);
@@ -129,7 +139,7 @@ void openCodingSession(int sock_FD, char req[], char res[])
         else if (strcmp(req, END) == 0)
             break;
         else
-            addLine(program, req, strlen(program), strlen(req), &program_size, res);
+            addLine(program, req, strlen(req), &program_size, res);
 
         // 2) send the res
         // the send for PRINT was already handled
@@ -180,9 +190,9 @@ void clearProgram(char program[], size_t *program_size, char *res)
         strcpy(res, CLEAR_ERR);
 }
 
-void addLine(char program[], char req[], size_t program_len, size_t req_len, size_t *program_size, char *res)
+void addLine(char program[], char req[], size_t req_len, size_t *program_size, char *res)
 {
-    if ((program_len + req_len + 1) > PROGRAM_SIZE)
+    if ((*program_size + req_len + 1) > PROGRAM_SIZE)
         strcpy(res, ADD_ERR);
 
     strcat(program, req);
@@ -195,4 +205,9 @@ void sendRes(int sock_FD, char res[], size_t res_len)
     if (send(sock_FD, res, res_len, 0) == -1)
         handle_exit("Unable to send res to client");
     printf(GREEN "res sent: ok\n" RESET);
+}
+
+void sendProgramChunks(int sock_FD, char *res, char *program)
+{
+
 }
