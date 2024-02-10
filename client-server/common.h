@@ -10,8 +10,8 @@
 #include <sys/types.h>
 
 #define PORT 3000
-#define REQ_LEN 500
-#define RES_LEN 500
+#define REQ_LEN 256
+#define RES_LEN 256
 
 #define GREEN "\e[0;32m"
 #define CYAN "\e[0;36m"
@@ -48,7 +48,7 @@
 // list all the possible commands to the user
 #define HELP "HELP"
 
-#define PROGRAM_SIZE 5000
+#define PROGRAM_SIZE 2048
 #define HELP_PATH "./help.txt"
 
 #define handle_exit(msg) \

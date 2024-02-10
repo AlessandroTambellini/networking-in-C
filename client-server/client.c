@@ -5,7 +5,8 @@
 typedef struct sockaddr_in sockaddr_in;
 typedef struct sockaddr sockaddr;
 
-void startCodingSession(int sock_FD, char req[], char res[]);
+void 
+startCodingSession(int sock_FD, char req[], char res[]);
 
 int 
 main(void) 
@@ -28,7 +29,7 @@ main(void)
     printf("Type HELP in the req to know the commands\n\n");
 
     char res[RES_LEN], req[REQ_LEN];
-    int isReqSent = 0, isResRecv = 0;
+    ssize_t req_len = 0, res_len = 0;
 
     while (1)
     {
@@ -39,13 +40,13 @@ main(void)
         // 
 
         // 1) send the req
-        isReqSent = send(client_socket_FD, req, strlen(req) + 1, 0); 
-        if (isReqSent == -1)
+        req_len = send(client_socket_FD, req, strlen(req) + 1, 0); 
+        if (req_len == -1)
             handle_break("Unable to send msg to server");
 
         // 2) get the res
-        isResRecv = recv(client_socket_FD, res, RES_LEN, 0); 
-        if (isResRecv == -1)
+        res_len = recv(client_socket_FD, res, RES_LEN, 0); 
+        if (res_len == -1)
             handle_break("Unable to recevice res from server");
 
         // 3) act after the res is recv
@@ -67,45 +68,63 @@ main(void)
 
 void startCodingSession(int sock_FD, char req[], char res[])
 {
+    ssize_t req_len = 0, res_len = 0;
     printf("\n[TERMINAL_OPEN]\n");
 
     while (1)
     {
         printf(YELLOW "\t" BOLD "> ");
-        /* if the req len > 499 chars, the exceeding chars are not deleted, but stored for the next req */
+        /* if the req len > 255 chars, the exceeding chars are not deleted, but stored for the next req */
         fgets(req, REQ_LEN, stdin);
         req[strcspn(req, "\n")] = 0;
 
-        int isReqSent = send(sock_FD, req, strlen(req) + 1, 0);
-        if (isReqSent == -1)
+        req_len = send(sock_FD, req, strlen(req) + 1, 0);
+        if (req_len == -1)
             handle_break("Unable to send the code line");
 
-        int isResRecv = recv(sock_FD, res, RES_LEN, 0);
-        if (isResRecv == -1)
-            handle_break("Unable to recv res");
+        // delete empty line after enter key is pressed
+        // printf("\x1b[A");
         
-        printf(MAGENTA "\t" "< ");
+        // the PRINT is handled separately because there can be more chunks receviced, being the possible len of a program grather than RES_LEN (255 chars + \0 == 256)
+        if (strcmp(req, PRINT) == 0)
+        {
+            printf(MAGENTA "\t" "< ");
+            while (1)
+            {
+                res_len = recv(sock_FD, res, RES_LEN, 0);
+                if (res_len == -1) {
+                    handle_break("Unable to recv res"); 
+                } 
+                printf("%s", res);
+                if (res_len < RES_LEN)
+                    break;
+            }
+            printf("\n");
+        }
+        else
+        {
+            res_len = recv(sock_FD, res, RES_LEN, 0);
+            if (res_len == -1)
+                handle_break("Unable to recv res"); 
+        }
+
+        // PRINT is not managed here, but just above
         if (strcmp(res, READ_ERR) == 0)
-            printf("Server unable to read code line");
+            printf("Server unable to read code line\n");
         else if (strcmp(res, ADD_ERR) == 0)
-            printf("Reached max program size: %d", PROGRAM_SIZE);
+            printf(MAGENTA "\t" "< " "Reached max program size: %d\n", PROGRAM_SIZE);
         else if (strcmp(res, EXEC_ERR) == 0)
-            printf("Program result: ERROR");
+            printf(MAGENTA "\t" "< " "Program result: ERROR\n");
         else if (strcmp(res, EXEC_OK) == 0)
-            printf("Program result: RESULT");
+            printf(MAGENTA "\t" "< " "Program result: RESULT\n");
         else if (strcmp(res, CLEAR_ERR) == 0)
-            printf("Server unable to clear program");
-        else if (strcmp(req, PRINT) == 0)
-            printf("%s", res);
+            printf("Server unable to clear program\n");
         else if (strcmp(res, END_OK) == 0)
             break;
-        else
-            printf("ok");
-        printf("\n");
     }
 
     if (strcmp(res, END_OK) == 0)
-        printf("ok");
+        printf(MAGENTA "\t" "< " "ok");
 
     printf(RESET "\n[TERMINAL_CLOSE]\n\n");
 }

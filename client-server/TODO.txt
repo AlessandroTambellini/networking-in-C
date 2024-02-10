@@ -1,12 +1,16 @@
 - I get `Unable to bind: Address already in use` if I close the server before the client
 - I brutaly handle trasmission and reception of msgs. I just exit the while or exit the program.
-- solve the problem of REQ_INVALID
 - read the comments
+- power of 2 sizes are more handy for future dynamic allocations-- thing about it
+- the req could be more than 256, I mean is just sent in chunks
+- isReqSent and isResRecv should be size_t
+- if I enter empty space after a command, the command results as not valid (REQ_INVALID)
+- if I enter PRINT before having written any code, the terminal is stacked
 
 TERMINAL
     - PRINT:
         - print the program in a nice format. So, on separate lines
-        - send the program in chunks of 500 chars
+        - send the program in chunks of 256 chars
     - enable basic keys:
         - if I enter up arrow, the previous command shows
         - if I enter down arrow, the successive command shows

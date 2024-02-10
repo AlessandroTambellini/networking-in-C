@@ -11,12 +11,18 @@
 typedef struct sockaddr sockaddr;
 typedef struct sockaddr_in sockaddr_in;
 
-void openCodingSession(int sock_FD, char req[], char res[]);
-void getHelpTxt(char res[]);
-char *execProgram(char program[]);
-char *clearProgram(char program[]);
-char *addLine(char program[], char req[], size_t program_len, size_t req_len);
-void sendRes(int sock_FD, char res[], size_t res_len);
+void 
+openCodingSession(int sock_FD, char req[], char res[]);
+void 
+getHelpTxt(char res[]);
+void 
+execProgram(char *res);
+void 
+clearProgram(char program[], size_t *program_size, char *res);
+void 
+addLine(char program[], char req[], size_t program_len, size_t req_len, size_t *program_size, char *res);
+void 
+sendRes(int sock_FD, char res[], size_t res_len);
 
 int 
 main(void)
@@ -49,11 +55,11 @@ main(void)
     printf("Client connected from IP %s from port %d\n", inet_ntoa(client_addr.sin_addr), ntohs(client_addr.sin_port));
 
     char req[REQ_LEN], res[RES_LEN];
-    int isResSent = 0, isReqRead = 0;
+    ssize_t req_len = 0;
     while (1)
     {   
-        isReqRead = read(client_socket_FD, req, REQ_LEN);
-        if (isReqRead == -1)
+        req_len = read(client_socket_FD, req, REQ_LEN);
+        if (req_len == -1)
             handle_break("Unable to read client req");
         printf(CYAN "req: %s\n" RESET, req);
 
@@ -70,9 +76,7 @@ main(void)
             strcpy(res, REQ_INVALID);
 
         // 2) send the res
-        // because inside openCodingSession() is already sent the res
-        if (strcmp(req, END) != 0)
-            sendRes(client_socket_FD, res, strlen(res) + 1);
+        sendRes(client_socket_FD, res, strlen(res) + 1);
     }
 
     close(client_socket_FD);
@@ -85,32 +89,52 @@ void openCodingSession(int sock_FD, char req[], char res[])
     strcpy(res, OCS);
     sendRes(sock_FD, res, strlen(res) + 1);
 
+    ssize_t req_len = 0;
+    size_t program_size = 0;
     char program[PROGRAM_SIZE] = {0};
 
     while (1)
     {
-        int isReqRead = read(sock_FD, req,  REQ_LEN);
-        if (isReqRead == -1)
+        req_len = read(sock_FD, req,  REQ_LEN);
+        if (req_len == -1)
             strcpy(res, READ_ERR);
         
         // 1) read req, act consequently and write the res
         if (strcmp(req, EXEC) == 0)
-            strcpy(res, execProgram(program));
+            execProgram(res);
         else if (strcmp(req, PRINT) == 0)
         {
-            // TOFIX: I copy the program and sent it, but is fine only if it's a program less than 500 chars. But I do not handle this and an overflow is gonna happen because strcpy does not truncate the string to strlen - 2 and add 0 at strlen - 1
-            //  SOLUTION: I need to send the program in chunks of 499 chars
-            strcpy(res, program);
+            //  TOREVIEW: send the program in chunks of 255 chars
+            if (program_size == 0)
+            {
+                strcpy(res, program);
+                sendRes(sock_FD, res, strlen(res) + 1);
+            }
+
+            size_t start_idx = 0, chunk_len = 0;
+            while (start_idx < program_size)
+            {
+                chunk_len = program_size - start_idx;
+                if (chunk_len > (REQ_LEN - 1))
+                    strncpy(res, &program[start_idx], REQ_LEN - 1);
+                else
+                    strcpy(res, &program[start_idx]);
+                
+                sendRes(sock_FD, res, strlen(res) + 1);
+                start_idx += (REQ_LEN - 1);
+            }
         }
         else if (strcmp(req, CLEAR) == 0)
-            strcpy(res, clearProgram(program));
+            clearProgram(program, &program_size, res);
         else if (strcmp(req, END) == 0)
             break;
         else
-            strcpy(res, addLine(program, req, strlen(program), strlen(req)));
+            addLine(program, req, strlen(program), strlen(req), &program_size, res);
 
         // 2) send the res
-        sendRes(sock_FD, res, strlen(res) + 1);
+        // the send for PRINT was already handled
+        if (strcmp(req, PRINT) != 0)
+            sendRes(sock_FD, res, strlen(res) + 1);     
     }
 
     if (strcmp(req, END) == 0)
@@ -139,29 +163,31 @@ void getHelpTxt(char res[])
     fclose(help_file);
 }
 
-char *execProgram(char program[])
+void execProgram(char *res)
 {
     // fake res
-    return EXEC_OK;
+    strcpy(res, EXEC_OK);
     // TODO: build the compiler
 }
 
-char *clearProgram(char program[])
+void clearProgram(char program[], size_t *program_size, char *res)
 {
     memset(program, 0, PROGRAM_SIZE);
+    *program_size = 0;
     if (strlen(program) == 0)
-        return CLEAR_OK;
+        strcpy(res, CLEAR_OK);
     else
-        return CLEAR_ERR; 
+        strcpy(res, CLEAR_ERR);
 }
 
-char *addLine(char program[], char req[], size_t program_len, size_t req_len)
+void addLine(char program[], char req[], size_t program_len, size_t req_len, size_t *program_size, char *res)
 {
     if ((program_len + req_len + 1) > PROGRAM_SIZE)
-        return ADD_ERR;
+        strcpy(res, ADD_ERR);
 
     strcat(program, req);
-    return ADD_OK;
+    *program_size += req_len;
+    strcpy(res, ADD_OK);
 }
 
 void sendRes(int sock_FD, char res[], size_t res_len)
