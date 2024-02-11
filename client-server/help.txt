@@ -2,7 +2,9 @@ COMMANDS for the client:
     - GREET: just for testing connection
     - CODE: start coding session
     - PRINT: print the program written so far
-    - CLEAR: clear the program written so far
+    - CLEAR: 
+        - if used during coding session, it clears the program written so far
+        - if used in the terminal, it clears all req sent and res received 
     - EXEC: execute the program
     - END: end coding session
     - CLOSE: close connection
