@@ -45,6 +45,9 @@ main(void)
                 printf(RED BOLD "The req is too long!\n" RESET);
             isReqEmpty = strcmp(req, "\n") == 0 ? true : false;
 
+
+            // for now there're no commands that need more than a single word. So I can simply substitute empty spaces with end of string char.
+            req[strcspn(req, " ")] = '\0';
             // '\n' is read by the server and if so is not able to understand the req
             req[strcspn(req, "\n")] = '\0';
 

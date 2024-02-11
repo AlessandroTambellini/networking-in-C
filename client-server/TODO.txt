@@ -1,10 +1,6 @@
 - I brutaly handle trasmission and reception of errors. I just exit the while or exit the program.
 
-CODEBASE:
-    - store server functions in server-utils.c && store client functions in client-utils.c --> and as a consequence update the Makefile
-
 TERMINAL
-    - if I enter empty space after a command, the command results as not valid (REQ_INVALID) --> allow empty spaces
 
 CODING SESSION
     - SERVER-SIDE
