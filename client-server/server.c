@@ -69,6 +69,7 @@ main(void)
         req_len = read(client_socket_FD, req, REQ_LEN);
         if (req_len == -1)
             handle_break("Unable to read client req");
+
         printf(CYAN "req: %s\n" RESET, req);
 
         // 1) write the res

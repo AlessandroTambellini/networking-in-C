@@ -1,5 +1,6 @@
 #include <netinet/in.h>
 #include <string.h>
+#include <stdio_ext.h>
 #include "common.h"
 
 typedef struct sockaddr_in sockaddr_in;
@@ -30,24 +31,30 @@ main(void)
 
     char res[RES_LEN], req[REQ_LEN];
     ssize_t req_len = REQ_LEN, res_len = 0;
-    int ask_again = 0;
+    bool isReqTooLong = false;
 
     while (1)
     {
-        printf("req: ");
-
         do
         {
-            // no problem with buffer overflows because there's always one between '\0' or '\n'
+            printf("req: ");
+            
+            // just a symbol different than \0. If the string is too long is substituted with \0 by fgets
             req[REQ_LEN - 1] = 'j';
-            // fgets adds \0 at the end of the string, even if is overflowing
-            fgets(req, REQ_LEN, stdin);
-            ask_again = req[REQ_LEN - 1] == 'j' ? 0 : 1;
-            req[strcspn(req, "\n")] = '\0';
-        } while (ask_again);
 
-        // TODO: tell the user the req was too long
-        
+            // fgets adds \0 at the end of the string, even if is overflowing. Plus, when you enter, you add '\n'. Therefore it is string + '\n' + '\0'. So, max input is 253 chars
+            fgets(req, REQ_LEN, stdin);
+            // remove all the chars still in the stream if the req was > 255
+            __fpurge(stdin);
+
+            isReqTooLong = req[REQ_LEN - 1] == 'j' ? false : true;
+            if (isReqTooLong)
+                printf(RED BOLD "The req is too long!\n" RESET);
+
+            // '\n' is read by the server and if so is not able to understand the req
+            req[strcspn(req, "\n")] = '\0';
+
+        } while (isReqTooLong);
 
         // 1) send the req
         req_len = send(client_socket_FD, req, strlen(req) + 1, 0); 
@@ -86,9 +93,10 @@ void startCodingSession(int sock_FD, char req[], char res[])
     while (1)
     {
         printf(YELLOW "\t" BOLD "> ");
-        /* if the req len > 255 chars, the exceeding chars are not deleted, but stored for the next req */
+
         fgets(req, REQ_LEN, stdin);
-        req[strcspn(req, "\n")] = 0;
+        __fpurge(stdin);
+        req[strcspn(req, "\n")] = '\0';
 
         req_len = send(sock_FD, req, strlen(req) + 1, 0);
         if (req_len == -1)

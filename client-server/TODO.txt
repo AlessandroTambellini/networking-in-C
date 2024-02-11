@@ -1,5 +1,4 @@
-- I brutaly handle trasmission and reception of msgs. I just exit the while or exit the program.
-- the req could be more than 256, I mean is just sent in chunks. Stop the user from writing more than 256 chars. Otherwise it would be a broken request not managable
+- I brutaly handle trasmission and reception of errors. I just exit the while or exit the program.
 
 UX
     - if I enter empty space after a command, the command results as not valid (REQ_INVALID) --> allow empty spaces
@@ -7,6 +6,10 @@ UX
 - when you close the coding session, the program is deleted
 
 TERMINAL
+    - if I just press enter ('\n') a req is trasmitted, but it should just prompt to enter a new req
+    - add a CLEAR command
+
+CODING SESSION
     - PRINT:
         - print the program in a nice format. So, on separate lines (not yet)
     - enable basic keys:
@@ -15,3 +18,4 @@ TERMINAL
         - if I enter left arrow, move cursor to the left
         - if I enter right arrow, move cursor to the right
 
+FDSFSDFDSSFDSFSDFDSSFDSFSDFDSSFDSFSDFDSSFDSFSDFDSSFDSFSDFDSSFDSFSDFDSSFDSFSDFDSSFDSFSDFDSSFDSFSDFDSSFDSFSDFDSSFDSFSDFDSSFDSFSDFDSSFDSFSDFDSSFDSFSDFDSSFDSFSDFDSSFDSFSDFDSSFDSFSDFDSSFDSFSDFDSSFDSFSDFDSSFDSFSDFDSSFDSFSDFDSSFDSFSDFDSSFDSFSDFDSSFDSFSDFDSSFDSFSDFDSSFDSFSDFDSSFDSFSDFDSSFDSFSDFDSSFDSFSDFDSS

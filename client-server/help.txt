@@ -8,4 +8,4 @@ COMMANDS for the client:
     - CLOSE: close connection
 
 INFO:
-    - max req length: 255
+    - max req length: 253
