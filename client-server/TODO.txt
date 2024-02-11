@@ -1,15 +1,14 @@
 - I brutaly handle trasmission and reception of errors. I just exit the while or exit the program.
 
-UX
-    - if I enter empty space after a command, the command results as not valid (REQ_INVALID) --> allow empty spaces
-
-- when you close the coding session, the program is deleted
+CODEBASE:
+    - store server functions in server-utils.c && store client functions in client-utils.c --> and as a consequence update the Makefile
 
 TERMINAL
-    - if I just press enter ('\n') a req is trasmitted, but it should just prompt to enter a new req
-    - add a CLEAR command
+    - if I enter empty space after a command, the command results as not valid (REQ_INVALID) --> allow empty spaces
 
 CODING SESSION
+    - SERVER-SIDE
+        - when you close the coding session, the program is deleted
     - PRINT:
         - print the program in a nice format. So, on separate lines (not yet)
     - enable basic keys:
@@ -18,4 +17,4 @@ CODING SESSION
         - if I enter left arrow, move cursor to the left
         - if I enter right arrow, move cursor to the right
 
-FDSFSDFDSSFDSFSDFDSSFDSFSDFDSSFDSFSDFDSSFDSFSDFDSSFDSFSDFDSSFDSFSDFDSSFDSFSDFDSSFDSFSDFDSSFDSFSDFDSSFDSFSDFDSSFDSFSDFDSSFDSFSDFDSSFDSFSDFDSSFDSFSDFDSSFDSFSDFDSSFDSFSDFDSSFDSFSDFDSSFDSFSDFDSSFDSFSDFDSSFDSFSDFDSSFDSFSDFDSSFDSFSDFDSSFDSFSDFDSSFDSFSDFDSSFDSFSDFDSSFDSFSDFDSSFDSFSDFDSSFDSFSDFDSSFDSFSDFDSS
+string longer than 256 chars: FDSFSDFDSSFDSFSDFDSSFDSFSDFDSSFDSFSDFDSSFDSFSDFDSSFDSFSDFDSSFDSFSDFDSSFDSFSDFDSSFDSFSDFDSSFDSFSDFDSSFDSFSDFDSSFDSFSDFDSSFDSFSDFDSSFDSFSDFDSSFDSFSDFDSSFDSFSDFDSSFDSFSDFDSSFDSFSDFDSSFDSFSDFDSSFDSFSDFDSSFDSFSDFDSSFDSFSDFDSSFDSFSDFDSSFDSFSDFDSSFDSFSDFDSSFDSFSDFDSSFDSFSDFDSSFDSFSDFDSSFDSFSDFDSSFDSFSDFDSS
