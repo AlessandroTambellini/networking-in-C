@@ -2,7 +2,7 @@
 #define COMMON_H
 
 #define  _GNU_SOURCE
-#include <stdio.h>
+#include <stdio.h> // ncurses.h includes stdio.h
 #include <stdlib.h>
 #include <unistd.h>
 #include <stdbool.h>

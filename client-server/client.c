@@ -1,3 +1,5 @@
+#include <ncurses.h>
+
 #include "client_utils.h"
 
 typedef struct sockaddr sockaddr;
@@ -16,6 +18,8 @@ main(void)
         .sin_addr.s_addr = INADDR_ANY, 
     };  
 
+    printf("Connecting to the server...\n");
+
     int isConnected = connect(client_socket_FD, (sockaddr*)&server_addr, sizeof(server_addr)); 
     if (isConnected == -1) 
         handle_exit("Unable to connect socket");
@@ -30,7 +34,7 @@ main(void)
     {
         do
         {
-            printf("req: ");
+            printf("["BOLD"user"RESET"@OS ~]$ ");
             
             // just a symbol different than \0. If the string is too long is substituted with \0 by fgets
             req[REQ_LEN - 1] = 'j';
@@ -74,11 +78,11 @@ main(void)
 
         // 3) act after the res is recv
         if (strcmp(req, GREET) == 0)
-            printf(CYAN "res: %s\n" RESET, res);
+            printf(CYAN "%s\n" RESET, res);
         else if (strcmp(req, HELP) == 0)
             printf(CYAN "%s\n" RESET, res);
         else if (strcmp(res, REQ_INVALID) == 0)
-            printf(RED "res: %s\n" RESET, res);
+            printf(RED "%s\n" RESET, res);
         else if (strcmp(res, OCS) == 0)
             startCodingSession(client_socket_FD, req, res);
         else if (strcmp(req, CLOSE) == 0)

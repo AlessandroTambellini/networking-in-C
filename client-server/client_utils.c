@@ -3,11 +3,12 @@
 void startCodingSession(int sock_FD, char req[], char res[])
 {
     ssize_t req_len = 0, res_len = 0;
-    printf("\n[TERMINAL_OPEN]\n");
+    printf("psychic-disco 1.0.0\n" 
+    "Type \"help\" for more information\n");
 
     while (1)
     {
-        printf(YELLOW "\t" BOLD "> ");
+        printf(YELLOW BOLD ">>> ");
 
         fgets(req, REQ_LEN, stdin);
         __fpurge(stdin);
@@ -23,7 +24,7 @@ void startCodingSession(int sock_FD, char req[], char res[])
         // the PRINT is handled separately because there can be more chunks receviced, being the possible len of a program grather than RES_LEN (255 chars + \0 == 256)
         if (strcmp(req, PRINT) == 0)
         {
-            printf(MAGENTA "\t" "< ");
+            printf(MAGENTA);
             while (1)
             {
                 res_len = recv(sock_FD, res, RES_LEN, 0);
@@ -47,11 +48,11 @@ void startCodingSession(int sock_FD, char req[], char res[])
         if (strcmp(res, READ_ERR) == 0)
             printf("Server unable to read code line\n");
         else if (strcmp(res, ADD_ERR) == 0)
-            printf(MAGENTA "\t" "< " "Reached max program size: %d\n", PROGRAM_SIZE);
+            printf(MAGENTA "Reached max program size: %d\n", PROGRAM_SIZE);
         else if (strcmp(res, EXEC_ERR) == 0)
-            printf(MAGENTA "\t" "< " "Program result: ERROR\n");
+            printf(MAGENTA "Program result: ERROR\n");
         else if (strcmp(res, EXEC_OK) == 0)
-            printf(MAGENTA "\t" "< " "Program result: RESULT\n");
+            printf(MAGENTA "Program result: RESULT\n");
         else if (strcmp(res, CLEAR_ERR) == 0)
             printf("Server unable to clear program\n");
         else if (strcmp(res, END_OK) == 0)
@@ -59,13 +60,14 @@ void startCodingSession(int sock_FD, char req[], char res[])
     }
 
     if (strcmp(res, END_OK) == 0)
-        printf(MAGENTA "\t" "< " "ok");
+        printf(MAGENTA "ok");
 
     printf(RESET "\n[TERMINAL_CLOSE]\n\n");
 }
 
 void showStartMsg(void)
 {
-    printf(CYAN "Connected to server on port %d successfully\n" RESET, PORT);
+    printf(CYAN "Connected on port %d.\n" RESET, PORT);
     printf("Type HELP in the req to know the commands\n\n");
 }
+

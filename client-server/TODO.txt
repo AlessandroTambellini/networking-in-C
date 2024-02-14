@@ -1,4 +1,6 @@
 - I brutaly handle trasmission and reception of errors. I just exit the while or exit the program.
+- Why did I choose uppercase letters for commands? They are not handy
+- This can be the archeotype for my AGILE project
 
 TERMINAL
 
