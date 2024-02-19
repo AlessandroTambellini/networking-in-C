@@ -1,3 +1,4 @@
+// ncurses is not used (at least for now). The UI is keeped primitive
 #include <ncurses.h>
 
 #include "client_utils.h"

@@ -12,15 +12,13 @@ void startCodingSession(int sock_FD, char req[], char res[])
 
         fgets(req, REQ_LEN, stdin);
         __fpurge(stdin);
+        req[strcspn(req, " ")] = '\0';
         req[strcspn(req, "\n")] = '\0';
 
         req_len = send(sock_FD, req, strlen(req) + 1, 0);
         if (req_len == -1)
             handle_break("Unable to send the code line");
 
-        // delete empty line after enter key is pressed
-        // printf("\x1b[A");
-        
         // the PRINT is handled separately because there can be more chunks receviced, being the possible len of a program grather than RES_LEN (255 chars + \0 == 256)
         if (strcmp(req, PRINT) == 0)
         {
