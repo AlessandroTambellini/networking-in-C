@@ -1,27 +1,37 @@
-#include "common.h"
-#include "html.h"
+#include <arpa/inet.h>
+#include <errno.h>
+#include <netinet/in.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+
+#include <sys/socket.h>
+#include <sys/types.h>
+
+#define MAX_HTML_SIZE 64*1024
+#define PORT 3000
+
+typedef struct sockaddr sockaddr;
 
 #define MAX_HOSTNAME_SIZE 100
 
-int mistring()
-{
-    return 1;
-}
+void get_HTML(char *HTML);
 
-int main(int argc, char *argv[])
+int main(void)
 {
-    struct sockaddr_in dest; // socket info about the machine connecting to us
-    struct sockaddr_in serv; // socket info about our server
+    struct sockaddr_in client;
+    struct sockaddr_in server;
+
     socklen_t socksize = sizeof(struct sockaddr_in);
 
-    // address setup
-    memset(&serv, 0, sizeof(serv));
-    serv.sin_family = AF_INET;
-    serv.sin_addr.s_addr = htonl(INADDR_ANY);
-    serv.sin_port = htons(PORTNUM);
+    memset(&server, 0, sizeof(server));
+    server.sin_family = AF_INET;
+    server.sin_addr.s_addr = htonl(INADDR_ANY);
+    server.sin_port = htons(PORT);
 
-    int mysocket = socket(AF_INET, SOCK_STREAM, 0);
-    if (mysocket == -1) {
+    int listen_socket = socket(AF_INET, SOCK_STREAM, 0);
+    if (listen_socket == -1) {
         switch (errno) {
         case EPROTONOSUPPORT:
             printf("Error: protocol not supported.\n");
@@ -36,39 +46,50 @@ int main(int argc, char *argv[])
         exit(EXIT_FAILURE);
     }
 
-    // bind a socket to a port
-    if (bind(mysocket, (sockaddr *)&serv, sizeof(sockaddr)) == -1) {
+    if (bind(listen_socket, (sockaddr *)&server, sizeof(sockaddr)) == -1) {
         printf("Error: unable to bind.\n");
         exit(EXIT_FAILURE);
     }
 
-    char hostname[MAX_HOSTNAME_SIZE];
-    gethostname(hostname, MAX_HOSTNAME_SIZE);
-    printf("hostname: %s\n", hostname);
-
-    /* start listening, listen(socket, backlog). backlog = max num of connections
-    the socket will queue up, each waiting to be accepted */
-    if (listen(mysocket, 1) == -1) {
+    /* listen(socket, backlog). backlog = max num of connections
+    the socket will queue up, each waiting to be accepted. */
+    if (listen(listen_socket, 1) == -1) {
         printf("Error: unable to listen for new connections.\n");
         exit(EXIT_FAILURE);
+    } else {
+        printf("Listening on port %d.\n", PORT);
     }
 
-    int connect_socket = accept(mysocket, (sockaddr *)&dest, &socksize);
-    if (connect_socket == -1) {
-        printf("Error: unable to open new socket.\n");
-        exit(EXIT_FAILURE);
+    char HTML[MAX_HTML_SIZE];
+    
+    while (1) 
+    {
+        int conn_socket = accept(listen_socket, (sockaddr *)&client, &socksize);
+        if (conn_socket == -1) {
+            printf("Error: unable to open new socket.\n");
+            exit(EXIT_FAILURE);
+        }
+
+        printf("Incoming connection from %s\n", inet_ntoa(client.sin_addr));
+        
+        get_HTML(HTML);
+        send(conn_socket, HTML, strlen(HTML), 0);
+        close(conn_socket);
     }
 
-    char HTML[HTML_SIZE];
-    create_HTML_content(HTML);
+    close(listen_socket);
 
-    while (1) {
-        printf("Incoming connection from %s - sending msg\n", inet_ntoa(dest.sin_addr));
-        send(connect_socket, HTML, strlen(HTML), 0);
-        close(connect_socket);
-        connect_socket = accept(mysocket, (sockaddr *)&dest, &socksize);
-    }
+    return 0;
+}
 
-    close(mysocket);
-    return EXIT_SUCCESS;
+void get_HTML(char *HTML)
+{
+    char *HTML_header = "HTTP/1.0 200 OK\r\nContent-Type: text/html;\r\n\r\n";
+    strcpy(HTML, HTML_header);
+
+    FILE *HTML_p = fopen("index.html", "r");
+
+    while (fgets(HTML + strlen(HTML), MAX_HTML_SIZE - strlen(HTML), HTML_p));
+
+    fclose(HTML_p);
 }

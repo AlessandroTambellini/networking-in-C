@@ -1,5 +1,3 @@
-// ncurses is not used (at least for now). The UI is keeped primitive
-#include <ncurses.h>
 
 #include "client_utils.h"
 
@@ -35,7 +33,7 @@ main(void)
     {
         do
         {
-            printf("["BOLD"user"RESET"@OS ~]$ ");
+            printf("["BOLD"user"RESET"@machine ~]$ ");
             
             // just a symbol different than \0. If the string is too long is substituted with \0 by fgets
             req[REQ_LEN - 1] = 'j';
