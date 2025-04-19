@@ -1,2 +1,4 @@
 test.c
 *.out
+.vscode
+client-server/archive
