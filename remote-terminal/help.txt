@@ -1,0 +1,9 @@
+- GREET: just for testing connection
+- CLEAR: clear the terminal screen
+- CODE: start coding session
+- During coding session:
+    * PRINT: print the program written so far
+    * CLEAR: it clears the program written so far
+    * EXEC: execute the program
+    * END: end coding session
+- CLOSE: close connection

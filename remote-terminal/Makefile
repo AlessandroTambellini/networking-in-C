@@ -1,5 +1,5 @@
 CC = clang
-CFLAGS = -Wall -Wextra -std=c11
+CFLAGS = -std=c11
 
 all: server client
 

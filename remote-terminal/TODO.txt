@@ -1,0 +1,6 @@
+CODING SESSION
+    - enable basic keys:
+        - if I enter up arrow, nothing happens
+        - if I enter down arrow, nothing happens
+        - if I enter left arrow, move cursor to the left
+        - if I enter right arrow, move cursor to the right

@@ -8,12 +8,16 @@
 typedef struct sockaddr sockaddr;
 typedef struct sockaddr_in sockaddr_in;
 
-void openCodingSession(int sock_FD, char req[], char res[]);
+size_t program_size = 0;
+char program[PROGRAM_SIZE] = {0};
+
+void open_coding_session(int sock_FD, char req[], char res[]);
+
 void getHelpTxt(char res[]);
-void execProgram(char *res);
-void clearProgram(char program[], size_t *program_size, char *res);
-void addLine(char program[], char req[], size_t req_len, size_t *program_size, char *res);
-void sendRes(int sock_FD, char res[], size_t res_len);
+void exec_program(char *res);
+void clear_program(char program[], size_t *program_size, char *res);
+void add_line(char program[], char req[], size_t req_len, size_t *program_size, char *res);
+void send_res(int sock_FD, char res[], size_t res_len);
 
 int 
 main(void)
@@ -61,7 +65,7 @@ main(void)
             fprintf(stderr, "Unable to read client req."); 
             perror(" ");
             strcpy(res, "The server is not able to read the request.");
-            sendRes(client_sock, res, strlen(res) + 1);
+            send_res(client_sock, res, strlen(res) + 1);
             continue;
         }
 
@@ -70,7 +74,7 @@ main(void)
         if (strcmp(req, GREET) == 0)
             strcpy(res, "Hello!");
         else if (strcmp(req, CODE) == 0)
-            openCodingSession(client_sock, req, res);
+            open_coding_session(client_sock, req, res);
         else if (strcmp(req, CLOSE) == 0)
             break;
         else if (strcmp(req, HELP) == 0)
@@ -78,7 +82,7 @@ main(void)
         else
             strcpy(res, REQ_INVALID);
 
-        sendRes(client_sock, res, strlen(res) + 1);
+        send_res(client_sock, res, strlen(res) + 1);
     }
 
     // close(client_sock);
@@ -86,15 +90,12 @@ main(void)
     printf("Connection closed.\n");
 }
 
-void openCodingSession(int sock_FD, char req[], char res[])
+void open_coding_session(int sock_FD, char req[], char res[])
 {
     strcpy(res, OCS);
-    sendRes(sock_FD, res, strlen(res) + 1);
+    send_res(sock_FD, res, strlen(res) + 1);
 
     ssize_t req_len = 0;
-    // I need to use a variable instead of strlen(program) because otherwise I cannot calculate the program length inside a function
-    size_t program_size = 0;
-    char program[PROGRAM_SIZE] = {0};
 
     while (1)
     {
@@ -104,46 +105,45 @@ void openCodingSession(int sock_FD, char req[], char res[])
         
         // 1) read req, act consequently and write the res
         if (strcmp(req, EXEC) == 0)
-            execProgram(res);
+            exec_program(res);
         else if (strcmp(req, PRINT) == 0)
         {
-            //  TOREVIEW: send the program in chunks of 255 chars
-
             if (program_size == 0)
             {
-                strcpy(res, program);
-                sendRes(sock_FD, res, strlen(res) + 1);
+                strcpy(res, "");
+                send_res(sock_FD, res, strlen(res) + 1);
+                continue;
             }
 
             size_t start_idx = 0, chunk_len = 0;
             while (start_idx < program_size)
             {
                 chunk_len = program_size - start_idx;
-                if (chunk_len > (REQ_LEN - 1))
-                    strncpy(res, &program[start_idx], REQ_LEN - 1);
+                if (chunk_len > (RES_LEN - 1))
+                    strncpy(res, &program[start_idx], RES_LEN - 1);
                 else
                     strcpy(res, &program[start_idx]);
                 
-                sendRes(sock_FD, res, strlen(res) + 1);
-                start_idx += (REQ_LEN - 1);
+                send_res(sock_FD, res, strlen(res) + 1);
+                start_idx += (RES_LEN - 1);
             }
         }
         else if (strcmp(req, CLEAR) == 0)
-            clearProgram(program, &program_size, res);
+            clear_program(program, &program_size, res);
         else if (strcmp(req, END) == 0)
             break;
         else
-            addLine(program, req, strlen(req), &program_size, res);
+            add_line(program, req, strlen(req), &program_size, res);
 
         // 2) send the res
         // the send for PRINT was already handled
         if (strcmp(req, PRINT) != 0)
-            sendRes(sock_FD, res, strlen(res) + 1);     
+            send_res(sock_FD, res, strlen(res) + 1);     
     }
 
     if (strcmp(req, END) == 0)
         strcpy(res, END_OK);
-    sendRes(sock_FD, res, strlen(res) + 1);
+    send_res(sock_FD, res, strlen(res) + 1);
 }
 
 void getHelpTxt(char res[])
@@ -157,24 +157,29 @@ void getHelpTxt(char res[])
 
     // get file size
     fseek(help_file, 0, SEEK_END);
-    size_t help_len = ftell(help_file);
+    size_t file_size = ftell(help_file);
     fseek(help_file, 0, SEEK_SET);
 
-    res[0] = '\n';
-    fread(res + 1, sizeof(char), help_len, help_file);
-    res[help_len] = '\0';
+    if (file_size < REQ_LEN) {
+        res[0] = '\n';
+        fread(res + 1, sizeof(char), file_size, help_file);
+        res[file_size] = '\0';
+    } else {
+        printf("[WARN]: content size of help.txt (%zu) exceeds REQ_LEN (%u).\n", file_size, REQ_LEN);
+        // For now 1KB is enough. It's a warning for myself
+    }
 
     fclose(help_file);
 }
 
-void execProgram(char *res)
+void exec_program(char *res)
 {
     // fake res
     strcpy(res, EXEC_OK);
-    // TODO: build the compiler
+    // TODO: build the interpreter
 }
 
-void clearProgram(char program[], size_t *program_size, char *res)
+void clear_program(char program[], size_t *program_size, char *res)
 {
     memset(program, 0, PROGRAM_SIZE);
     *program_size = 0;
@@ -184,19 +189,20 @@ void clearProgram(char program[], size_t *program_size, char *res)
         strcpy(res, CLEAR_ERR);
 }
 
-void addLine(char program[], char req[], size_t req_len, size_t *program_size, char *res)
+void add_line(char program[], char line[], size_t line_size, size_t *program_size, char *res)
 {
-    if ((*program_size + req_len + 1) > PROGRAM_SIZE)
+    if ((*program_size + line_size + 1) > PROGRAM_SIZE)
         strcpy(res, ADD_ERR);
 
-    strcat(program, req);
-    *program_size += req_len;
+    strcat(program, line);
+    strcat(program, "\n");
+    *program_size += (line_size + 1);
     strcpy(res, ADD_OK);
 }
 
-void sendRes(int sock_FD, char res[], size_t res_len)
+void send_res(int sock_FD, char res[], size_t res_len)
 {
     if (send(sock_FD, res, res_len, 0) == -1)
-        handle_exit("Unable to send res to client");
-    printf(GREEN "res sent: ok\n" RESET);
+        handle_exit("Unable to send res to client.");
+    // printf(GREEN "res sent: ok\n" RESET);
 }
