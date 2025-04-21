@@ -13,7 +13,7 @@ char program[PROGRAM_SIZE] = {0};
 
 void open_coding_session(int sock_FD, char req[], char res[]);
 
-void getHelpTxt(char res[]);
+void get_help_txt(char res[]);
 void exec_program(char *res);
 void clear_program(char program[], size_t *program_size, char *res);
 void add_line(char program[], char req[], size_t req_len, size_t *program_size, char *res);
@@ -56,17 +56,15 @@ main(void)
         printf("Client connected from IP %s on port %d\n", inet_ntoa(client.sin_addr), ntohs(client.sin_port));
     }
 
-    char req[REQ_LEN], res[RES_LEN];
-    ssize_t req_len = 0;
     while (1)
     {   
-        req_len = read(client_sock, req, REQ_LEN);
-        if (req_len == -1) {
-            fprintf(stderr, "Unable to read client req."); 
-            perror(" ");
+        char req[MAX_REQ_LEN] = { 0 }; 
+        char res[MAX_RES_LEN] = { 0 };
+
+        if (read(client_sock, req, MAX_REQ_LEN) == -1) {
             strcpy(res, "The server is not able to read the request.");
             send_res(client_sock, res, strlen(res) + 1);
-            continue;
+            handle_break("Unable to read client req.");
         }
 
         printf(CYAN "req: %s\n" RESET, req);
@@ -78,7 +76,7 @@ main(void)
         else if (strcmp(req, CLOSE) == 0)
             break;
         else if (strcmp(req, HELP) == 0)
-            getHelpTxt(res);
+            get_help_txt(res);
         else
             strcpy(res, REQ_INVALID);
 
@@ -95,12 +93,9 @@ void open_coding_session(int sock_FD, char req[], char res[])
     strcpy(res, OCS);
     send_res(sock_FD, res, strlen(res) + 1);
 
-    ssize_t req_len = 0;
-
     while (1)
     {
-        req_len = read(sock_FD, req,  REQ_LEN);
-        if (req_len == -1)
+        if (read(sock_FD, req,  MAX_REQ_LEN) == -1)
             strcpy(res, READ_ERR);
         
         // 1) read req, act consequently and write the res
@@ -119,13 +114,13 @@ void open_coding_session(int sock_FD, char req[], char res[])
             while (start_idx < program_size)
             {
                 chunk_len = program_size - start_idx;
-                if (chunk_len > (RES_LEN - 1))
-                    strncpy(res, &program[start_idx], RES_LEN - 1);
+                if (chunk_len > (MAX_RES_LEN - 1))
+                    strncpy(res, &program[start_idx], MAX_RES_LEN - 1);
                 else
                     strcpy(res, &program[start_idx]);
                 
                 send_res(sock_FD, res, strlen(res) + 1);
-                start_idx += (RES_LEN - 1);
+                start_idx += (MAX_RES_LEN - 1);
             }
         }
         else if (strcmp(req, CLEAR) == 0)
@@ -135,22 +130,21 @@ void open_coding_session(int sock_FD, char req[], char res[])
         else
             add_line(program, req, strlen(req), &program_size, res);
 
-        // 2) send the res
-        // the send for PRINT was already handled
+        // 2) send the res (the res for PRINT was already sent)
         if (strcmp(req, PRINT) != 0)
             send_res(sock_FD, res, strlen(res) + 1);     
     }
 
-    if (strcmp(req, END) == 0)
+    if (strcmp(req, END) == 0) {
         strcpy(res, END_OK);
-    send_res(sock_FD, res, strlen(res) + 1);
+        send_res(sock_FD, res, strlen(res) + 1);
+    }
 }
 
-void getHelpTxt(char res[])
+void get_help_txt(char res[])
 {
     FILE *help_file = fopen(HELP_PATH, "r");
-    if (!help_file)
-    {
+    if (!help_file) {
         strcpy(res, "Sorry, unable to display the help guide.");
         return;
     }
@@ -160,12 +154,10 @@ void getHelpTxt(char res[])
     size_t file_size = ftell(help_file);
     fseek(help_file, 0, SEEK_SET);
 
-    if (file_size < REQ_LEN) {
-        res[0] = '\n';
-        fread(res + 1, sizeof(char), file_size, help_file);
-        res[file_size] = '\0';
+    if (file_size < MAX_REQ_LEN) {
+        fread(res, sizeof(char), file_size, help_file);
     } else {
-        printf("[WARN]: content size of help.txt (%zu) exceeds REQ_LEN (%u).\n", file_size, REQ_LEN);
+        printf("[WARN]: content size of help.txt (%zu) exceeds MAX_REQ_LEN (%u).\n", file_size, MAX_REQ_LEN);
         // For now 1KB is enough. It's a warning for myself
     }
 

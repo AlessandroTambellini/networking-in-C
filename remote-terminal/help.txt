@@ -7,3 +7,5 @@
     * EXEC: execute the program
     * END: end coding session
 - CLOSE: close connection
+
+INFO: max length of a request is 1024 chars.

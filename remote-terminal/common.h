@@ -15,8 +15,8 @@
 
 #define PORT 3000
 
-#define REQ_LEN 1024
-#define RES_LEN 1024
+#define MAX_REQ_LEN 1024
+#define MAX_RES_LEN 1024
 
 #define GREEN "\e[0;32m"
 #define CYAN "\e[0;36m"
